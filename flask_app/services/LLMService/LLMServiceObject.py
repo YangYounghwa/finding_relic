@@ -10,11 +10,14 @@ from flask import current_app
 from langchain_openai import ChatOpenAI
 import logging
 from pydantic import BaseModel, Field
-from langchain.output_parsers import PydanticOutputParser, OutputParserException
+from langchain.output_parsers import PydanticOutputParser
+from langchain_core.exceptions import OutputParserException 
 from langchain.prompts import PromptTemplate
 
 from flask_app.dto.llmserviceDTO import KorRelation
-
+from langchain_community.callbacks import get_openai_callback
+from dotenv import load_dotenv
+load_dotenv()
 
 class LLMServiceObjet:
     
@@ -26,9 +29,9 @@ class LLMServiceObjet:
         
         # API KEY Loads automatically
         self.llm_mini_cold = ChatOpenAI(model=openaiMINI,temperature=0) 
-        self.llm_nanao_cold = ChatOpenAI(model=openaiNANO,temperature=0)
+        self.llm_nano_cold = ChatOpenAI(model=openaiNANO,temperature=0)
         self.llm_mini_warm = ChatOpenAI(model=openaiMINI,temperature=0.1) 
-        self.llm_nanao_warm = ChatOpenAI(model=openaiNANO,temperature=0.1)
+        self.llm_nano_warm = ChatOpenAI(model=openaiNANO,temperature=0.1)
 
      
     def isKorHisRelated(self,text:str)->Dict:
@@ -36,30 +39,43 @@ class LLMServiceObjet:
         current_app.logger.debug("isKoreHistoryRelated().")
         # Checks the context and findout if it is related to korean history. 
         # If not, it will not be used for query
-        result = Dict({"related":True, "error":False})
+        # result = {"related": True, "error": False}
         
 
         
         parser = PydanticOutputParser(pydantic_object=KorRelation)
-        text_to_extract_relation = "Read the text and check whether if the text is related to the Korena History, if so mark related as True, if not mark it false. If you are not sure on the result mark unsure as True, otherwise false."
+        template = """Read the text and check whether if the text is related to the Korean History, if so mark related as True, if not mark it false. If you are not sure on the result mark unsure as True, otherwise false.
         
+        {format_instructions}
+        
+        Text: {query}
+        """
         
         prompt = PromptTemplate(
-            template=text_to_extract_relation,
+            template=template,
             input_variables=["query"],
-            output_parser={"format_instructions":parser.get_format_instructions()}
+            partial_variables={"format_instructions": parser.get_format_instructions()}
         )
         
         llm = self.llm_nano_cold
         chain = prompt | llm | parser
-        try:
-            prompt = text_to_extract_relation
-            relation = chain.invoke({'query':prompt})
-            current_app.logger.debug(f"relation.related:{relation.related}")
-        except OutputParserException as e:
-            current_app.logger.debug(f"Failed to parse LLM response")
-            current_app.logger.debug(f"Arguments {e.args[0]}") 
         
+        with get_openai_callback() as cb:
+            try:
+                relation = chain.invoke({'query': text})
+                current_app.logger.debug(f"relation.related:{relation.related}")
+                
+            except OutputParserException as e:
+                current_app.logger.debug(f"Failed to parse LLM response")
+                current_app.logger.debug(f"Arguments {e.args[0]}")
+                relation = {"error": True}
         
+        # Access the token counts after the LLM call
+        current_app.logger.info(f"Total Tokens: {cb.total_tokens}")
+        current_app.logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
+        current_app.logger.info(f"Completion Tokens: {cb.completion_tokens}")
+        current_app.logger.info(f"Total Cost (USD): ${cb.total_cost}")
+        
+        return relation
         return relation
     
