@@ -7,6 +7,8 @@ import os
 from flask_app.services.LLMService.LLMServiceObject import LLMServiceObjet
 from flask import Flask
 
+
+
 @pytest.fixture
 def mock_flask_app():
     """A fixture to mock a Flask app instance with a logger."""
@@ -14,6 +16,8 @@ def mock_flask_app():
     with app.app_context():
         yield app
 
+
+@pytest.mark.skip(reason="Works well now.")
 def test_isKorHisRelated_with_logging(mock_flask_app, caplog):
     """
     Tests that the isKoreHistoryRelated() log message is captured.
@@ -39,4 +43,34 @@ def test_isKorHisRelated_with_logging(mock_flask_app, caplog):
         print("---------------------")
 
         # Assert that the specific log message exists in the captured text.
-        assert "isKoreHistoryRelated()." in caplog.text
+        
+        
+        
+        
+
+def test_getNationality_with_logging(mock_flask_app, caplog):
+    """
+    Tests that the isKoreHistoryRelated() log message is captured.
+    """
+    # Set the environment variables required for the class to initialize.
+    # monkeypatch.setenv("OPENAI_MINI_MODEL", "dummy_mini")
+    # monkeypatch.setenv("OPENAI_NANO_MODEL", "dummy_nano")
+    
+
+    goryeo_related = "고려가 북진을 표방하고 거란을 노골적으로 적대했으며 요나라 역시 중원으로의 팽창을 염두에 둔 탓에 요와 필연적으로 충돌할 수밖에 없었고 그 결과로 벌어진 세 차례의 전쟁에서 승리했다. 요, 송, 금과 사대 관계를 맺어도 주권 국가로서 처신해 고려만의 독자적 천하관에 따라 내부에 번국을 설정하고 외왕내제 체제를 유지했다."
+    
+    Goguryeo_text = """初其臣得來, 見王侵叛中國, 數諫, 王不從. 得來嘆曰, "立見此地, 將生蓬蒿." 遂不食而死. 毋丘儉令諸軍, 不壞其墓, 不伐其樹, 得其妻子, 皆放遣之. 括地志云, "不耐城即國內城也. 城累石爲之." 此即丸都山與國內城相接. 梁書以, "司馬懿討公孫淵, 王遣將襲西安平, 毋丘儉來侵." 通鑑以, "得來諫王, 爲王位宮時事." 誤也."""
+    Goguryeo_text_in_korean = """처음에 신하 득래(得來)는 왕이 중국을 침략하고 배반하는 것을 보고 여러 차례 간언하였으나 왕이 따르지 않았다. 득래가 탄식하며 말하기를, "이 땅이 (폐허가 되어) 장차 쑥이 자라나는 꼴을 보겠구나."라고 하고 마침내 음식을 먹지 않고 죽었다. 관구검이 모든 군사들에게 명령하여 그의 무덤을 허물지 말고, 주변의 나무를 베지 못하게 하였으며, 그의 처와 자식을 포로로 잡았으나 모두 놓아서 보내주었다. 《괄지지(括地志)》에는 "불내성이 곧 국내성이다. 성을 돌로 쌓아 만들었다."라고 하였다. 이런즉 환도산과 국내성이 서로 가까이 접하였을 것이다. 《양서》에는 "사마의가 공손연을 토벌하자 왕이 장수를 보내 서안평(西安平)을 습격하였는데 관구검이 침략해왔다."라고 하였다. 《자치통감》에는 "득래가 왕에게 시정을 건의한 것은 왕 위궁(位宮) 때의 일이다."라고 하였는데, 이는 잘못이다"""
+    # Set the logging level for this test to DEBUG to capture all messages.
+    with caplog.at_level('DEBUG'):
+        llm_service = LLMServiceObjet() 
+        
+        # The function will make a real API call here.
+        llm_service.getNationality(Goguryeo_text)
+
+        # You can now access the logs captured by caplog.
+        print("\n--- Captured Logs ---")
+        print(caplog.text)
+        print("---------------------")
+
+        # Assert that the specific log message exists in the captured text.

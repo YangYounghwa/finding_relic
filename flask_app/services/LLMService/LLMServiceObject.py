@@ -14,7 +14,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException 
 from langchain.prompts import PromptTemplate
 
-from flask_app.dto.llmserviceDTO import KorRelation
+from flask_app.dto.llmserviceDTO import KorRelation, KoreanNations, Nations, k_nation_descriptions
 from langchain_community.callbacks import get_openai_callback
 from dotenv import load_dotenv
 load_dotenv()
@@ -77,5 +77,59 @@ class LLMServiceObjet:
         current_app.logger.info(f"Total Cost (USD): ${cb.total_cost}")
         
         return relation
-        return relation
     
+    
+    
+    def getNationality(self, text:str)->str:
+        
+        
+        k_nation_descriptions.korean_nations_descriptions
+
+        # Step 3: Create an instance of the PydanticOutputParser
+        parser = PydanticOutputParser(pydantic_object=Nations)
+
+        # Step 4: Define the prompt template
+        
+        template="""글을 읽고 해당하는 한국 역사 속 국가/시대 이름을 알려줘.
+        Here are the available options with brief descriptions: {options_with_descriptions}.
+
+Your response must be a single item from the list. Follow the specified format instructions below.
+
+        {format_instructions}
+
+        Text: {text}
+        """
+        options_with_descriptions = "\n".join([
+    f"* **{nation}**: {desc}" for nation, desc in k_nation_descriptions.korean_nations_descriptions.items()
+])
+
+        prompt = PromptTemplate(
+            template=template,
+            input_variables=["text"],
+            partial_variables={
+                "options_with_descriptions": options_with_descriptions,
+                "format_instructions": parser.get_format_instructions()
+            }
+        )
+        
+        llm = self.llm_mini_cold
+        chain = prompt | llm | parser
+        
+        with get_openai_callback() as cb:
+            try:
+                nation = chain.invoke({"text": text})
+                current_app.logger.debug(f"relation.related:{nation.name}")
+                
+            except OutputParserException as e:
+                current_app.logger.debug(f"Failed to parse LLM response")
+                current_app.logger.debug(f"Arguments {e.args[0]}")
+                relation = {"error": True}
+        
+        # Access the token counts after the LLM call
+        current_app.logger.info(f"Total Tokens: {cb.total_tokens}")
+        current_app.logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
+        current_app.logger.info(f"Completion Tokens: {cb.completion_tokens}")
+        current_app.logger.info(f"Total Cost (USD): ${cb.total_cost}")
+        
+        return nation
+        

@@ -6,7 +6,68 @@
 
 
 
+from enum import Enum
 from pydantic import BaseModel, Field
 class KorRelation(BaseModel):
-            related:bool = Field(description="Whether if the text is related to the Korean history")
-            unsure:bool = Field(description="If you are not sure about it, mark as true")
+    related:bool = Field(description="Whether if the text is related to the Korean history")
+    unsure:bool = Field(description="If you are not sure about it, mark as true")
+            
+            
+# Step 1: Define the Enum for Korean dynasties
+class KoreanNations(str, Enum):
+
+    oldStoneAge = "구석기"
+    middleStoneAge = "중석기"
+    neolithicAge = "신석기"
+    bronzeAge = "청동기"
+    earlyIronAge = "초기철기"
+    protoThreeKingdoms = "원삼국"
+    nangang = "낙랑"
+    goguryeobaekje = "고구려"
+    baekje = "벡제"
+    silla = "신라"
+    gaya = "가야"
+    threeKingdoms = "삼국"
+    unifinedSilla = "통일신라"
+    balhae = "발해"
+    lateSillatoEarlyGoryeo = "라말여초"
+    goryeo = "고려"
+    goguryeolateGoryeoEarlyJoseon = "려말선초"
+    joseon = "조선"
+    daehanjeguk = "대한제국"
+    japaneseRuleofKoreaByForce = "일제강점"
+    afterIndependence = "광복이후"
+    after2000 = "200년 이후"
+    ageUnknown = "시대미상"
+    
+
+# Step 2: Define a Pydantic model to hold the parsed result
+class Nations(BaseModel):
+    name: KoreanNations = Field(description="Historic era/nation names in Korean history.")
+    
+class k_nation_descriptions:
+    korean_nations_descriptions = {
+    "구석기": "Paleolithic Age. Hunter-gatherer society, characterized by the use of chipped stone tools.",
+    "중석기": "Mesolithic Age. A transitional period between the Paleolithic and Neolithic, with smaller, more refined stone tools.",
+    "신석기": "Neolithic Age. The beginning of agriculture, pottery, and settled village life.",
+    "청동기": "Bronze Age. The era when bronze tools and weapons were first used, leading to the emergence of class societies and fortified settlements.",
+    "초기철기": "Early Iron Age. Iron tools and weapons begin to appear, leading to more advanced agricultural techniques and warfare. This era includes nations like Buyeo and Jin.",
+    "원삼국": "Proto–Three Kingdoms period. A transitional time with many small tribal states, including Buyeo, Okjeo, and Dongye, before the formal establishment of the Three Kingdoms.",
+    "낙랑": "Nangnang Commandery. A Chinese military commandery established in the Korean peninsula after the fall of Gojoseon.",
+    "고구려": "Goguryeo. One of the Three Kingdoms, known for its expansive territory and military strength, located in the northern part of the peninsula.",
+    "백제": "Baekje. One of the Three Kingdoms, located in the southwestern part of the peninsula, known for its rich culture and maritime trade.",
+    "신라": "Silla. One of the Three Kingdoms, located in the southeastern part of the peninsula, which eventually unified the peninsula.",
+    "가야": "Gaya. A confederacy of small city-states in the southern peninsula, known for its iron production.",
+    "삼국": "Three Kingdoms period. The era of the three rival kingdoms: Goguryeo, Baekje, and Silla.",
+    "통일신라": "Unified Silla. The period after Silla conquered Baekje and Goguryeo, unifying most of the Korean peninsula.",
+    "발해": "Balhae. A kingdom established in the northern parts of the former Goguryeo territory.",
+    "라말여초": "Late Silla to Early Goryeo. A period of transition and political instability marked by the decline of Unified Silla and the rise of Goryeo.",
+    "고려": "Goryeo. A dynasty known for its Buddhist culture, celadon pottery, and defense against invasions from the North.",
+    "려말선초": "Late Goryeo to Early Joseon. A time of political and social upheaval, leading to the collapse of Goryeo and the founding of the Joseon dynasty.",
+    "조선": "Joseon. The last dynastic kingdom, known for its strong Confucian influence, rich culture, and isolationist policies.",
+    "대한제국": "Korean Empire. A short-lived empire established by King Gojong of Joseon, marking a period of modernization before Japanese colonization.",
+    "일제강점": "Japanese Rule. The period when Korea was under the colonial rule of the Japanese Empire.",
+    "광복이후": "Post-Liberation. The period after the end of Japanese colonial rule in 1945, including the division of Korea and the Korean War.",
+    "200년 이후": "After 2000. Refers to the modern era of the 21st century.",
+    "시대미상": "Age Unknown. Used when the text doesn't provide enough information to identify a specific historical period."
+}
