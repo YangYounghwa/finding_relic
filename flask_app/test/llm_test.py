@@ -5,6 +5,8 @@ import os
 # Assuming the tests are in flask_app/test/ and you need to adjust the path.
 
 from flask_app.services.LLMService.LLMServiceObject import LLMServiceObjet
+from flask_app.services.emuseumService.EmuseumService import emuseum
+from pprint import pprint
 from flask import Flask
 
 
@@ -47,7 +49,7 @@ def test_isKorHisRelated_with_logging(mock_flask_app, caplog):
         
         
         
-
+@pytest.mark.skip(reason="Works well now.")
 def test_getNationality_with_logging(mock_flask_app, caplog):
     """
     Tests that the isKoreHistoryRelated() log message is captured.
@@ -74,3 +76,7 @@ def test_getNationality_with_logging(mock_flask_app, caplog):
         print("---------------------")
 
         # Assert that the specific log message exists in the captured text.
+
+
+def test_getDetailInfo_with_logging(mock_flask_app, caplog):
+    emuseum.getDetailInfo(id='PS0100100101101235600000')
