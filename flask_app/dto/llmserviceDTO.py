@@ -37,7 +37,7 @@ class KoreanNations(str, Enum):
     daehanjeguk = "대한제국"
     japaneseRuleofKoreaByForce = "일제강점"
     afterIndependence = "광복이후"
-    after2000 = "200년 이후"
+    after2000 = "2000년 이후"
     ageUnknown = "시대미상"
     
 
@@ -68,6 +68,6 @@ class k_nation_descriptions:
     "대한제국": "Korean Empire. A short-lived empire established by King Gojong of Joseon, marking a period of modernization before Japanese colonization.",
     "일제강점": "Japanese Rule. The period when Korea was under the colonial rule of the Japanese Empire.",
     "광복이후": "Post-Liberation. The period after the end of Japanese colonial rule in 1945, including the division of Korea and the Korean War.",
-    "200년 이후": "After 2000. Refers to the modern era of the 21st century.",
+    "2000년 이후": "After 2000. Refers to the modern era of the 21st century.",
     "시대미상": "Age Unknown. Used when the text doesn't provide enough information to identify a specific historical period."
 }
