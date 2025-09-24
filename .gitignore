@@ -88,4 +88,4 @@ media/
 
 
 samples/
-flask_app/data/
+flask_app/data/*
