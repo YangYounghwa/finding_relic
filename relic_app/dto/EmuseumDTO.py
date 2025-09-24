@@ -80,7 +80,19 @@ class BriefInfo(BaseModel):
 class BriefList(BaseModel):
     totalCount:int
     brief_info_list:List[BriefInfo]
-    
+
+    def add_brief_list(self, new_brief_list: 'BriefList'):
+        """
+        Appends items from another BriefList, ensuring uniqueness based on BriefInfo.id.
+        """
+        existing_ids = {info.id for info in self.brief_info_list}
+        
+        for new_info in new_brief_list.brief_info_list:
+            if new_info.id not in existing_ids:
+                self.brief_info_list.append(new_info)
+                existing_ids.add(new_info.id)
+        
+        self.totalCount = len(self.brief_info_list)
 
 T = TypeVar('T')
 class APIResponse(BaseModel,Generic[T]):
