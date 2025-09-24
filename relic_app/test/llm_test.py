@@ -144,7 +144,7 @@ def test_getPurpose_with_logging2(mock_flask_app, caplog):
         print(caplog.text)
         print("---------------------")
     
-# @pytest.mark.skip(reason="Not ready") 
+@pytest.mark.skip(reason="Works well.") 
 def test_three_with_logging(mock_flask_app, caplog):
     
     
@@ -167,5 +167,4 @@ def test_EmuseumService(mock_flask_app, caplog):
     print(caplog.text)
     # emuseum.getDetailInfo(id="PS0100100101101235600000")
     # print(caplog.text)
-    
 

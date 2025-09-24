@@ -4,10 +4,10 @@ import os
 
 from flask import Flask, jsonify, request
 from flask_cors import CORS
-from flask_sqlalchemy import SQLAlchemy
+
 from dotenv import load_dotenv
 
-from relic_app.dto.EmuseumDTO import APIResponse, BriefList
+from relic_app.dto.EmuseumDTO import APIResponse, BriefList, DetailInfo
 load_dotenv()
 
 from google.auth.transport import requests
@@ -18,12 +18,13 @@ import logging
 logger = logging.getLogger(__name__)
 
 from relic_app.services.searchService.SearchService import searcher
+from relic_app.services.emuseumService.EmuseumService import emuseum
+from relic_app.dto.EmuseumDTO import DetailInfoList
 
 
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com")
-
-
+from flask_sqlalchemy import SQLAlchemy
 def create_app():
     """
     Application factory function for the Flask app.
@@ -57,19 +58,16 @@ def create_app():
 )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['GOOGLE_CLIENT_ID'] = os.environ.get("GOOGLE_CLIENT_ID")
+    
+    
+    
     db = SQLAlchemy(app)
-    
-    
-    
     class User(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         google_id = db.Column(db.String(128), unique=True, nullable=False)
 
         def __repr__(self):
             return f"<User {self.email}>"
-
-
-
     @app.before_first_request
     def create_tables():
         db.create_all()
@@ -85,7 +83,7 @@ def create_app():
         try:
             # Verify the Google ID token
             idinfo = id_token.verify_oauth2_token(token, requests.Request(), GOOGLE_CLIENT_ID)
-            
+            # idinfo =0
             # Extract user info
             google_id = idinfo['sub']
             
@@ -126,10 +124,12 @@ def create_app():
     
     @app.route("/test/detailInfo",methods=['GET'])
     def test_detailInfo():
-        id = request.json.get("data").get("id")
-        from relic_app.services.emuseumService.EmuseumService import emuseum
-        from relic_app.dto.EmuseumDTO import DetailList
-        result:DetailList = emuseum.getDetailInfo(id)
+        id = request.args.get("id")  # CORRECTED LINE
+
+        detail:DetailInfo = emuseum.getDetailInfo(id)
+        result:DetailInfoList = DetailInfoList([detail]) 
+        responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
+        return jsonify(responseObj.model_dump())
         
         
 
