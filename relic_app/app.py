@@ -1,5 +1,4 @@
-import datetime
-import logging
+
 import os
 
 from flask import Flask, jsonify, request
@@ -8,23 +7,26 @@ from flask_cors import CORS
 from dotenv import load_dotenv
 
 from relic_app.dto.EmuseumDTO import APIResponse, BriefList, DetailInfo
-load_dotenv()
 
 from google.auth.transport import requests
 from google.oauth2 import id_token
 
 from flask_jwt_extended import create_access_token, JWTManager, jwt_required, get_jwt_identity
-import logging
-logger = logging.getLogger(__name__)
 
 from relic_app.services.searchService.SearchService import searcher
 from relic_app.services.emuseumService.EmuseumService import emuseum
 from relic_app.dto.EmuseumDTO import DetailInfoList
 
 
+from datetime import datetime
+from flask_sqlalchemy import SQLAlchemy
+
+import logging
+logger = logging.getLogger(__name__)
+
+load_dotenv()
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com")
-from flask_sqlalchemy import SQLAlchemy
 def create_app():
     """
     Application factory function for the Flask app.
@@ -68,10 +70,6 @@ def create_app():
 
         def __repr__(self):
             return f"<User {self.email}>"
-    @app.before_first_request
-    def create_tables():
-        db.create_all()
-
 
     
     @app.route("/google-login", methods=["POST"])
@@ -127,7 +125,7 @@ def create_app():
         id = request.args.get("id")  # CORRECTED LINE
 
         detail:DetailInfo = emuseum.getDetailInfo(id)
-        result:DetailInfoList = DetailInfoList([detail]) 
+        result = DetailInfoList(detail_info_list=[detail])
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
         return jsonify(responseObj.model_dump())
         
