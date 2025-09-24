@@ -68,6 +68,47 @@ class Meterial(BaseModel):
     name: MeterialsEnum = Field(description="Material used in the relic.")
     
     
+class PurposeEnum(str,Enum):
+    
+    etc_purpoe = "기타자료"
+    media = "미디어"
+    science_tech = "과학기술"
+    medical = "보건의료"
+    military = "군사"
+    art_culture ="문화예술"
+    religion = "종교신앙"
+    society = "사회생활"
+    traditional_science = "전통과학"
+    transportation_communication = "교통/통신"
+    industry_livelihood = "산업/생업"
+    residential = "주생활"
+    diet = "식생활"
+    clothing = "의생활"
+
+class Purpose(BaseModel):
+    name: PurposeEnum = Field(description="Type of the relic.")
+    
+
+
+class Purpose_descriptions:
+    purpose_descriptions = {
+        "기타자료": "Other purposes not specified in the listed categories.",
+        "미디어": "Materials used for recording, storing, or transmitting information such as manuscripts, inscriptions, prints, or audiovisual media.",
+        "과학기술": "Objects related to scientific knowledge, experimentation, inventions, and technological advancements.",
+        "보건의료": "Artifacts associated with medicine, healing practices, pharmaceuticals, and public health.",
+        "군사": "Items connected to warfare, defense, weapons, armor, and military organization.",
+        "문화예술": "Objects used in creative expression such as painting, sculpture, music, theater, and literature.",
+        "종교신앙": "Artifacts related to spiritual practices, rituals, sacred objects, temples, and religious beliefs.",
+        "사회생활": "Objects reflecting daily social activities, governance, law, education, and community life.",
+        "전통과학": "Items linked to indigenous knowledge systems, astronomy, calendrical science, and traditional natural philosophy.",
+        "교통/통신": "Artifacts related to movement of people and goods, or transmission of information, such as vehicles, ships, letters, and signaling devices.",
+        "산업/생업": "Objects associated with production, agriculture, craftsmanship, labor, and livelihood activities.",
+        "주생활": "Items used in housing, domestic architecture, furniture, and household management.",
+        "식생활": "Artifacts related to food preparation, cooking, storage, and consumption.",
+        "의생활": "Objects related to clothing, fashion, textiles, and accessories for personal use."
+    }
+    
+
     
 class Material_descriptions:
     material_descriptions = {

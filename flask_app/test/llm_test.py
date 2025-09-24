@@ -120,3 +120,25 @@ def test_getMaterial_with_logging2(mock_flask_app, caplog):
         print(caplog.text)
         print("---------------------")
     
+def test_getPurpose_with_logging2(mock_flask_app, caplog):
+    """
+    Tests that the getMaterial() log message is captured.
+    """
+
+    crown_text = """금관총 금관은 지금까지 발견된 신라 금관 중 가장 큰 것이다.[30] 이 금관이 발굴된 노서동의 고분은 금관총이라는 이름을 갖게 되었다. 1962년 12월 12일 국보로 지정되었다.
+높이는 44 cm, 머리띠 지름은 19 cm이다. 금관은 내관(內冠)과 외관(外冠)으로 구성되어 있는데, 이 금관은 외관으로 신라금관의 전형을 보여주고 있다. 즉, 원형의 머리띠 정면에 3단으로 ‘출(出)’자 모양의 장식 3개를 두고, 뒤쪽 좌우에 2개의 나뭇가지형(樹枝形) 혹은 사슴뿔모양(鹿角形) 금판 장식이 세워져 있다. 머리띠와 ‘출(出)’자 장식 주위에는 점이 찍혀 있고, 많은 비취색 옥과 구슬모양의 장식들이 규칙적으로 금실에 매달려 있다. 양 끝에는 가는 고리에 금으로 된 사슬이 늘어진 두 줄의 장식이 달려 있는데, 일정한 간격으로 나뭇잎 모양의 장식을 달았으며, 줄 끝에는 비취색 옥이 달려 있다. 현재 국립경주박물관에 있다.."""
+    
+    gold_crown_text = """신라 금관은 1921년 금관총에서 금관 및 금제 관식이 발견되며 처음 알려지게 되었다. 이후 1924년에 금령총에서, 1926년에 서봉총에서 잇달아 금관이 발굴되며 본격적인 관심을 받기 시작했다. 신라 금관들은 대부분 유사한 형태를 가지고 있는데, 이러한 모습을 샤먼의 관에 순록 뿔이 장식되던 것에 비유하여 샤머니즘적 권위를 나타낸 것이라는 의견이 1930년대에 처음 제안되었다.[2] 해방 이후의 한국 학계도 이러한 주장을 받아들여 연구를 계속 하고 있다."""
+
+    # Set the logging level for this test to DEBUG to capture all messages.
+    with caplog.at_level('DEBUG'):
+        llm_service = LLMServiceObjet() 
+        
+        # The function will make a real API call here.
+        llm_service.getPurpose(crown_text)
+
+        # You can now access the logs captured by caplog.
+        print("\n--- Captured Logs ---")
+        print(caplog.text)
+        print("---------------------")
+    
