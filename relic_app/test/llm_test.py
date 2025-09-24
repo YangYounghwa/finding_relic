@@ -4,9 +4,9 @@ import os
 
 # Assuming the tests are in flask_app/test/ and you need to adjust the path.
 
-from flask_app.services.LLMService.LLMServiceObject import LLMServiceObjet
-from flask_app.services.LLMService.LLMServiceObject import llmService
-from flask_app.services.emuseumService.EmuseumService import emuseum
+from relic_app.services.LLMService.LLMServiceObject import LLMServiceObjet
+from relic_app.services.LLMService.LLMServiceObject import llmService
+from relic_app.services.emuseumService.EmuseumService import emuseum
 from pprint import pprint
 from flask import Flask
 
@@ -152,7 +152,7 @@ def test_three_with_logging(mock_flask_app, caplog):
 
 이후 조선 후기에 평화가 오래 지속되자 일부 장수들은 두정갑 대신 장식갑옷을 입는 경우가 있었다. 장식갑옷은 두정갑과 겉모습이 똑같지만 내부에 갑옷미늘이 없다. 갑옷미늘이 없으므로 방호력도 약하고 당연히 실제 갑옷으로서의 효과는 없다..""" 
     with caplog.at_level('DEBUG'):
-        from flask_app.services.searchService.SearchService import SearchServiceObject
+        from relic_app.services.searchService.SearchService import SearchServiceObject
         search = SearchServiceObject()
         
         print(search.getItemList(armor_text))

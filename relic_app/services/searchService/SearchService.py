@@ -2,14 +2,14 @@
 import concurrent.futures
 
 from typing import List
-from flask_app.dto.EmuseumDTO import BriefList
-from flask_app.dto.llmserviceDTO import KorRelation, Material, Nations, Purpose
-from flask_app.services.LLMService.LLMServiceObject import llmService
-from flask_app.services.emuseumService.EmuseumService import emuseum
+from relic_app.dto.EmuseumDTO import BriefList
+from relic_app.dto.llmserviceDTO import KorRelation, Material, Nations, Purpose
+from relic_app.services.LLMService.LLMServiceObject import llmService
+from relic_app.services.emuseumService.EmuseumService import emuseum
 from pprint import pprint
 from flask import Flask
 
-from flask_app.util.MuseumCodeTranslator import materialConverter, purposeConverter, nationalityConverter
+from relic_app.util.MuseumCodeTranslator import materialConverter, purposeConverter, nationalityConverter
 
 import logging
 logger = logging.getLogger(__name__)
@@ -104,4 +104,4 @@ class SearchServiceObject:
         
         
         
-        
+searcher = SearchServiceObject()

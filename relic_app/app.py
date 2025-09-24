@@ -6,6 +6,8 @@ from flask import Flask, jsonify, request
 from flask_cors import CORS
 from flask_sqlalchemy import SQLAlchemy
 from dotenv import load_dotenv
+
+from relic_app.dto.EmuseumDTO import APIResponse, BriefList
 load_dotenv()
 
 from google.auth.transport import requests
@@ -14,6 +16,9 @@ from google.oauth2 import id_token
 from flask_jwt_extended import create_access_token, JWTManager, jwt_required, get_jwt_identity
 import logging
 logger = logging.getLogger(__name__)
+
+from relic_app.services.searchService.SearchService import searcher
+
 
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com")
@@ -113,7 +118,19 @@ def create_app():
         
     @app.route("/test/searchText",methods=['POST'])
     def test_searchText():
-        text= request.json.get("data")
-
+        text = request.json.get("data").get("text")
+        result:BriefList = searcher.getItemList(text)
+        
+        responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
+        return jsonify(responseObj.model_dump())
+    
+    @app.route("/test/detailInfo",methods=['GET'])
+    def test_detailInfo():
+        id = request.json.get("data").get("id")
+        from relic_app.services.emuseumService.EmuseumService import emuseum
+        from relic_app.dto.EmuseumDTO import DetailList
+        result:DetailList = emuseum.getDetailInfo(id)
+        
+        
 
     return app

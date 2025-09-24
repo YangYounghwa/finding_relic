@@ -4,13 +4,13 @@ from typing import Any, Dict, List
 from dotenv import load_dotenv
 from flask import current_app
 
-from flask_app.dto.EmuseumDTO import BriefInfo, BriefList, DetailInfo, ImageItem, ItemDetail, RelatedItem
+from relic_app.dto.EmuseumDTO import BriefInfo, BriefList, DetailInfo, ImageItem, ItemDetail, RelatedItem
 load_dotenv()
 import os
 
 import xmltodict
 
-from flask_app.util.MuseumCodeTranslator import materialConverter, purposeConverter, nationalityConverter
+from relic_app.util.MuseumCodeTranslator import materialConverter, purposeConverter, nationalityConverter
 
 import requests
 import logging
