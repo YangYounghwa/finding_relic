@@ -8,13 +8,14 @@ from pprint import pprint
 
 
 
-result = emuseum.getItemsByKeywords(name="백제",numOfRows=5)
-print(result)
+# result = emuseum.getItemsByKeywords(name="백제",numOfRows=5)
+# print(result)
 
 
 
 
-
+result2 = emuseum.getDetailInfo(id='PS0100100101101235600000')
+# print(result2)
 
 
 

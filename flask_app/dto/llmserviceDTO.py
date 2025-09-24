@@ -14,7 +14,7 @@ class KorRelation(BaseModel):
             
             
 # Step 1: Define the Enum for Korean dynasties
-class KoreanNations(str, Enum):
+class KoreanNationsEnum(str, Enum):
 
     oldStoneAge = "구석기"
     middleStoneAge = "중석기"
@@ -43,9 +43,55 @@ class KoreanNations(str, Enum):
 
 # Step 2: Define a Pydantic model to hold the parsed result
 class Nations(BaseModel):
-    name: KoreanNations = Field(description="Historic era/nation names in Korean history.")
+    name: KoreanNationsEnum = Field(description="Historic era/nation names in Korean history.")
+
+class MeterialsEnum(str,Enum):
+    metallic = "금속"
+    dirt = "흙"
+    porcelain = "도자기"
+    stone = "돌"
+    glass_jewelry = "유리/보석" 
+    grass = "풀"
+    wood = "나무"
+    bone_horn_clamshell = "뼈/뿔/조개"
+    paper = "종이"
+    leather_fur = "가죽/털"
+    fabric = "섬유"
+    seed = "씨앗"
+    mineral = "광물"
+    fossil = "화석"
+    rubber = "고무"
+    najeon = "칠기"
+    etc = "기타"
     
-class k_nation_descriptions:
+class Meterial(BaseModel):
+    name: MeterialsEnum = Field(description="Material used in the relic.")
+    
+    
+    
+class Material_descriptions:
+    material_descriptions = {
+    "금속": "Metallic materials like gold, silver, bronze, iron, etc.",
+    "흙": "Clay or earth-based materials, often used for pottery or earthenware.",
+    "도자기": "Ceramic materials, including porcelain, celadon, and stoneware.",
+    "돌": "Stone materials such as granite, marble, jade, or various rocks.",
+    "유리/보석": "Glass or gemstone materials, including precious and semi-precious stones.",
+    "풀": "Plant-based materials like straw, reeds, or other grasses.",
+    "나무": "Wood or timber materials.",
+    "뼈/뿔/조개": "Materials derived from animal bones, horns, or seashells.",
+    "종이": "Paper-based materials.",
+    "가죽/털": "Leather or fur materials.",
+    "섬유": "Textile materials like silk, cotton, hemp, etc.",
+    "씨앗": "Seeds or plant kernels.",
+    "광물": "Mineral substances.",
+    "화석": "Fossilized remains.",
+    "고무": "Rubber materials.",
+    "칠기": "Lacquered ware, often made from wood and coated with lacquer. 나전칠기.",
+    "기타": "Other materials not specified in the above categories."
+}
+    
+     
+class K_nation_descriptions:
     korean_nations_descriptions = {
     "구석기": "Paleolithic Age. Hunter-gatherer society, characterized by the use of chipped stone tools.",
     "중석기": "Mesolithic Age. A transitional period between the Paleolithic and Neolithic, with smaller, more refined stone tools.",
