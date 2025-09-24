@@ -7,6 +7,7 @@
 
 
 from enum import Enum
+from typing import Optional
 from pydantic import BaseModel, Field
 class KorRelation(BaseModel):
     related:bool = Field(description="Whether if the text is related to the Korean history")
@@ -41,9 +42,11 @@ class KoreanNationsEnum(str, Enum):
     ageUnknown = "시대미상"
     
 
-# Step 2: Define a Pydantic model to hold the parsed result
 class Nations(BaseModel):
     name: KoreanNationsEnum = Field(description="Historic era/nation names in Korean history.")
+    certainty: bool = Field(description="Is it certain, if so True on first name")
+    candidate: Optional[KoreanNationsEnum] = Field(description="A candidate historic era/nation name in Korean history.")
+    candidate_certainty: bool = Field(description="The candidate certain as well")
 
 class MeterialsEnum(str,Enum):
     metallic = "금속"
@@ -64,8 +67,12 @@ class MeterialsEnum(str,Enum):
     najeon = "칠기"
     etc = "기타"
     
-class Meterial(BaseModel):
+class Material(BaseModel):
     name: MeterialsEnum = Field(description="Material used in the relic.")
+    certainty: bool = Field(description="Is it certain, if so True on first name")
+    candidate: Optional[MeterialsEnum] = Field(description="A candidate material used in the relic.")
+    candidate_certainty: bool = Field(description="The candidate certain as well")
+    
     
     
 class PurposeEnum(str,Enum):
@@ -87,8 +94,10 @@ class PurposeEnum(str,Enum):
 
 class Purpose(BaseModel):
     name: PurposeEnum = Field(description="Type of the relic.")
+    certainty: bool = Field(description="Is it certain, if so True on first name")
+    candidate: Optional[PurposeEnum] = Field(description="A candidate type of the relic.")
+    candidate_certainty: bool = Field(description="The candidate certain as well")
     
-
 
 class Purpose_descriptions:
     purpose_descriptions = {

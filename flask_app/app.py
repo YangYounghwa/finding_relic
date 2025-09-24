@@ -108,6 +108,10 @@ def create_app():
             return jsonify(message=f"Hello, internal user {user.id}!", google_id=user.google_id), 200
         else:
             return jsonify({"msg": "User not found"}), 404
-
+        
+    @app.route("/test/searchText",methods=['POST'])
+    def test_searchText():
+        text= request.json.get("data")
+        
 
     return app

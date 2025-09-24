@@ -4,11 +4,13 @@ from typing import Any, Dict, List
 from dotenv import load_dotenv
 from flask import current_app
 
-from flask_app.dto.EmuseumDTO import DetailInfo, ImageItem, ItemDetail, RelatedItem
+from flask_app.dto.EmuseumDTO import BriefInfo, BriefList, DetailInfo, ImageItem, ItemDetail, RelatedItem
 load_dotenv()
 import os
 
 import xmltodict
+
+from flask_app.util.MuseumCodeTranslator import materialConverter, purposeConverter, nationalityConverter
 
 import requests
 
@@ -36,7 +38,8 @@ item_mapping = {
     'nameKr': 'nameKr', 'id': 'id', 'museumName1': 'museumName1',
     'museumName2': 'museumName2', 'desc': 'desc',
     'imgUri': 'imgUri', 'imgThumUriS': 'imgThumUriS',
-    'imgThumUriM': 'imgThumUriM', 'imgThumUriL': 'imgThumUriL'
+    'imgThumUriM': 'imgThumUriM', 'imgThumUriL': 'imgThumUriL',
+    'nationalityName1': 'nationalityName1', 'nationalityName2': 'nationalityName2',
 }
 image_mapping = {
     'imgUri': 'imgUri', 'imgThumUriS': 'imgThumUriS',
@@ -158,25 +161,37 @@ class EmuseumAPIService:
         return {entry['@key']: entry['@value'] for entry in item_list if '@key' in entry and '@value' in entry}
 
     
-    def _makeRequests(self,apiRoute:str,params:Dict,pageNo:int=1,numOfRows:int=10)->dict:
+    def _makeRequests(self, apiRoute: str, params: Dict, pageNo: int = 1, numOfRows: int = 10) -> tuple[list, int]:
         # makes requets and returns the content. 
-        params["serviceKey"]= self.apiKey
+        params["serviceKey"] = self.apiKey
         params["pageNo"] = pageNo
         params["numOfRows"] = numOfRows
         
-        
-        response=requests.get(self.emuseumURL+apiRoute,params)
+        response = requests.get(self.emuseumURL + apiRoute, params)
         xml_content = response.content
         json_data = xmltodict.parse(xml_content)
         
+        # DEBUG LINE
+        current_app.logger.info(json_data)
         
         items = json_data.get('result', {}).get('list', {}).get('data', [])
-        dict_items = []
-        for item_obj in items:
-            if 'item' in item_obj:
-                dict_items.append(self._item_list_to_dict(item_obj['item']))
-        return dict_items
+        total_count_str = json_data.get('result', {}).get('totalCount', '0')
+        total_count = int(total_count_str) if total_count_str.isdigit() else 0
         
+        dict_items = []
+        # API can return a dict for a single item or a list for multiple items.
+        if isinstance(items, list):
+            for item_obj in items:
+                if 'item' in item_obj:
+                    dict_items.append(self._item_list_to_dict(item_obj['item']))
+        elif isinstance(items, dict):
+            if 'item' in items:
+                dict_items.append(self._item_list_to_dict(items['item']))
+        current_app.logger.info(f"list received. total count : {total_count}")
+        return dict_items, total_count
+    
+    
+    
     def _makeRequests_detail(self,apiRoute:str,params:Dict,pageNo:int=1,numOfRows:int=1)->dict:
         # makes requets and returns the content. 
         params["serviceKey"]= self.apiKey
@@ -187,6 +202,9 @@ class EmuseumAPIService:
         response=requests.get(self.emuseumURL+apiRoute,params)
         xml_content = response.content
         json_data = xmltodict.parse(xml_content)
+        
+        #
+        
 
         
         return json_data
@@ -202,7 +220,7 @@ class EmuseumAPIService:
                            nationalityCode:str=None,meterialCode:str=None,
                            purposeCode:str=None,sizeRangeCode:str=None,
                            placeLandCode:str=None,designationCode:str=None,
-                           indexWord:str=None,pageNo:int=1,numOfRows:int=20):
+                           indexWord:str=None,pageNo:int=1,numOfRows:int=20)->BriefList:
         params={}
         if name:
             params['name'] = name
@@ -228,7 +246,32 @@ class EmuseumAPIService:
             params['indexWord'] = indexWord
 
         apiRoute = "/relic/list" 
-        return self._makeRequests(apiRoute, params,pageNo=pageNo,numOfRows=numOfRows)
+        raw_items, total_count = self._makeRequests(apiRoute, params, pageNo=pageNo, numOfRows=numOfRows)
+        # This total_count means possible results in the API, not returned counts.  
+        brief_info_list = []
+        for item in raw_items:
+            # Convert codes to human-readable names using the converters
+            nationality_name = nationalityConverter.code_to_nameKr(item.get('nationalityCode'))
+            purpose_name = purposeConverter.code_to_nameKr(item.get('purposeCode'))
+            material_name = materialConverter.code_to_nameKr(item.get('materialCode'))
+            
+            brief_info = BriefInfo(
+                nameKr=item.get('nameKr', item.get('name')), # As per DTO, use 'name' if 'nameKr' not found
+                id=item.get('id'),
+                imgUri=item.get('imgUri'),
+                imgThumUriS=item.get('imgThumUriS'),
+                imgThumUriM=item.get('imgThumUriM'),
+                imgThumUriL=item.get('imgThumUriL'),
+                museumName1=item.get('museumName1'),
+                museumName2=item.get('museumName2'),
+                museumName3=item.get('museumName3'),
+                nationalityName=nationality_name,
+                purposeName=purpose_name,
+                materialName=material_name,
+            )
+            brief_info_list.append(brief_info)
+            
+        return BriefList(totalCount=len(brief_info_list), brief_info_list=brief_info_list)
             
     def getDetailInfo(self,id:str)->DetailInfo:
         """_summary_
@@ -246,7 +289,7 @@ class EmuseumAPIService:
         apiRoute = "/relic/detail" 
         
         json_data = self._makeRequests_detail(apiRoute, params,pageNo=1,numOfRows=10)
-        etail_info_dto=None
+        detail_info_dto=None
         try:
             detail_info_dto = create_detail_info_dto_with_mapping(
                 json_data,
