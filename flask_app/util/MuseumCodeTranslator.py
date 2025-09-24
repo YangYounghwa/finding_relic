@@ -6,7 +6,7 @@
 
 from dotenv import load_dotenv
 load_dotenv()
-
+from pathlib import Path
 import csv
 import os
 
@@ -104,18 +104,25 @@ class CodeConverter:
         return self.code_to_parent.get(code)
     
     
+script_dir = Path(__file__).parent.resolve()
+
+material_file_path = script_dir / '..' / 'data' / "material_code.csv"
+purpose_file_path = script_dir / '..' / 'data' / 'purpose_code.csv'
+nationality_file_path = script_dir / '..' / 'data' / 'nationality_code.csv'
+museum_file_path = script_dir / '..' / 'data' / 'museum_code.csv'
+sizeRange_file_path = script_dir / '..' / 'data' / 'sizeRange_code.csv'
 
 materialConverter = CodeConverter()
-materialConverter.init_app(filepath=os.getenv('MATERIAL_CODE_PATH'))
+materialConverter.init_app(filepath=material_file_path)
 
 purposeConverter = CodeConverter()
-purposeConverter.init_app(filepath=os.getenv('PURPOSE_CODE_PATH'))
+purposeConverter.init_app(filepath=purpose_file_path)
 
 nationalityConverter = CodeConverter()
-nationalityConverter.init_app(filepath=os.getenv('NATIONALITY_CODE_PATH'))
+nationalityConverter.init_app(filepath=nationality_file_path)
 
 museumConverter = CodeConverter()
-museumConverter.init_app(filepath=os.getenv('MUSEUM_CODE_PATH'))
+museumConverter.init_app(filepath=museum_file_path)
 
 sizeRangeConverter = CodeConverter()
-sizeRangeConverter.init_app(filepath=os.getenv('SIZE_RANGE_CODE_PATH'))
+sizeRangeConverter.init_app(filepath=sizeRange_file_path)
