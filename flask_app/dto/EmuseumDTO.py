@@ -40,6 +40,10 @@ class ItemDetail(BaseModel):
     # If no matericalCode3, use materialCode2, if not found use materialCode1
     materialName:str | None
     
+    
+    nationalityName1:str | None # 한국
+    nationalityName2:str | None # 조선
+     
     imgUri:str | None
     imgThumUriS:str | None
     imgThumUriM:str | None
@@ -81,8 +85,9 @@ class BriefList(BaseModel):
 T = TypeVar('T')
 class APIResponse(BaseModel,Generic[T]):
     message:str | None
+    success:bool
     userId:int | None
-    searchQueryLeft:int | None  # Placeholder for now
+    # searchQueryLeft:int | None  # Placeholder for now
     data:T  # T can be either BriefList or DetailInfoList
     
     
