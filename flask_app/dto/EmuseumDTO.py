@@ -6,6 +6,7 @@
 
 from typing import List
 from pydantic import BaseModel
+from typing import Generic, TypeVar
 
 
 class ImageItem(BaseModel):
@@ -50,6 +51,10 @@ class DetailInfo(BaseModel):
     imageList:List[ImageItem] | None 
     related:RelatedItem | None
     
+class DetailInfoList(BaseModel):
+    detail_info_list:List[DetailInfo]
+
+    
     
 class BriefInfo(BaseModel):
     nameKr:str   # Use name if nameKr not found
@@ -66,6 +71,19 @@ class BriefInfo(BaseModel):
     nationalityName:str | None
     purposeName:str | None
     materialName:str | None
+
+
+class BriefList(BaseModel):
+    totalCount:int
+    brief_info_list:List[BriefInfo]
+    
+
+T = TypeVar('T')
+class APIResponse(BaseModel,Generic[T]):
+    message:str | None
+    userId:int | None
+    searchQueryLeft:int | None  # Placeholder for now
+    data:T  # T can be either BriefList or DetailInfoList
     
     
     

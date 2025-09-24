@@ -24,9 +24,6 @@ def test_isKorHisRelated_with_logging(mock_flask_app, caplog):
     """
     Tests that the isKoreHistoryRelated() log message is captured.
     """
-    # Set the environment variables required for the class to initialize.
-    # monkeypatch.setenv("OPENAI_MINI_MODEL", "dummy_mini")
-    # monkeypatch.setenv("OPENAI_NANO_MODEL", "dummy_nano")
     
     unrelated = "물론 16세기의 로어노크 식민지 이주시도나 17세기의 제임스타운(Jamestown) 개척이 있긴 했지만, 사실상 성공한 식민 이주는 메이플라워호로 이주한 청교도들 이후였다. 본국은 북미 식민지에 총독을 임명하기는 했으나 이 총독들도 본국 출신보다는 북미 식민지 태생의 이민 2세대나 3세대 인물들이었다. 그리고 각 식민지들은 영국과 영국의 국왕에게 충성한다는 조건하에서 자체적으로 의회와 주 정부를 구성하여 광범위한 자치권을 누리고 있었으며 영국도 이러한 방식으로 식민지를 유지하는 것이 편했다."
     related = "고려가 북진을 표방하고 거란을 노골적으로 적대했으며 요나라 역시 중원으로의 팽창을 염두에 둔 탓에 요와 필연적으로 충돌할 수밖에 없었고 그 결과로 벌어진 세 차례의 전쟁에서 승리했다. 요, 송, 금과 사대 관계를 맺어도 주권 국가로서 처신해 고려만의 독자적 천하관에 따라 내부에 번국을 설정하고 외왕내제 체제를 유지했다."
@@ -52,12 +49,8 @@ def test_isKorHisRelated_with_logging(mock_flask_app, caplog):
 @pytest.mark.skip(reason="Works well now.")
 def test_getNationality_with_logging(mock_flask_app, caplog):
     """
-    Tests that the isKoreHistoryRelated() log message is captured.
+    Tests that the getNationalityd() log message is captured.
     """
-    # Set the environment variables required for the class to initialize.
-    # monkeypatch.setenv("OPENAI_MINI_MODEL", "dummy_mini")
-    # monkeypatch.setenv("OPENAI_NANO_MODEL", "dummy_nano")
-    
 
     goryeo_related = "고려가 북진을 표방하고 거란을 노골적으로 적대했으며 요나라 역시 중원으로의 팽창을 염두에 둔 탓에 요와 필연적으로 충돌할 수밖에 없었고 그 결과로 벌어진 세 차례의 전쟁에서 승리했다. 요, 송, 금과 사대 관계를 맺어도 주권 국가로서 처신해 고려만의 독자적 천하관에 따라 내부에 번국을 설정하고 외왕내제 체제를 유지했다."
     
@@ -77,6 +70,53 @@ def test_getNationality_with_logging(mock_flask_app, caplog):
 
         # Assert that the specific log message exists in the captured text.
 
-
+@pytest.mark.skip(reason="Works well now.")
 def test_getDetailInfo_with_logging(mock_flask_app, caplog):
     emuseum.getDetailInfo(id='PS0100100101101235600000')
+    
+    
+@pytest.mark.skip(reason="Works well now.")
+def test_getMaterial_with_logging(mock_flask_app, caplog):
+    """
+    Tests that the getMaterial() log message is captured.
+    """
+
+    book = "직지심체요절의 정확한 이름은 《백운화상초록불조직지심체요절(白雲和尙抄錄佛祖直指心體要節)》이다. 제목을 풀이하면 백운[3]이라는 고승(화상)이 간추린(초록) 부처님(불조)의 깨달음(직지심체[4])을 요약한 책(요절)이라는 뜻이다. 이름이 길기 때문에 세간에서는 '직지' 또는 '직지심체요절'로 축약해서 부르는 경우가 많다. 일부에서는 '직지심경'으로 부르기도 하나, 직지는 불경이 아닌 요절이므로 '직지심경'은 명백히 잘못된 표현이다. 아마 반야심경을 불경의 대표라고 생각해서 직지+반야심경의 합성으로 튀어나온 단어인 듯."
+    
+    gold_crown_text = """신라 금관은 1921년 금관총에서 금관 및 금제 관식이 발견되며 처음 알려지게 되었다. 이후 1924년에 금령총에서, 1926년에 서봉총에서 잇달아 금관이 발굴되며 본격적인 관심을 받기 시작했다. 신라 금관들은 대부분 유사한 형태를 가지고 있는데, 이러한 모습을 샤먼의 관에 순록 뿔이 장식되던 것에 비유하여 샤머니즘적 권위를 나타낸 것이라는 의견이 1930년대에 처음 제안되었다.[2] 해방 이후의 한국 학계도 이러한 주장을 받아들여 연구를 계속 하고 있다."""
+
+    # Set the logging level for this test to DEBUG to capture all messages.
+    with caplog.at_level('DEBUG'):
+        llm_service = LLMServiceObjet() 
+        
+        # The function will make a real API call here.
+        llm_service.getMaterial(book)
+
+        # You can now access the logs captured by caplog.
+        print("\n--- Captured Logs ---")
+        print(caplog.text)
+        print("---------------------")
+
+
+@pytest.mark.skip(reason="Works well now.")   
+def test_getMaterial_with_logging2(mock_flask_app, caplog):
+    """
+    Tests that the getMaterial() log message is captured.
+    """
+
+    book = "직지심체요절의 정확한 이름은 《백운화상초록불조직지심체요절(白雲和尙抄錄佛祖直指心體要節)》이다. 제목을 풀이하면 백운[3]이라는 고승(화상)이 간추린(초록) 부처님(불조)의 깨달음(직지심체[4])을 요약한 책(요절)이라는 뜻이다. 이름이 길기 때문에 세간에서는 '직지' 또는 '직지심체요절'로 축약해서 부르는 경우가 많다. 일부에서는 '직지심경'으로 부르기도 하나, 직지는 불경이 아닌 요절이므로 '직지심경'은 명백히 잘못된 표현이다. 아마 반야심경을 불경의 대표라고 생각해서 직지+반야심경의 합성으로 튀어나온 단어인 듯."
+    
+    gold_crown_text = """신라 금관은 1921년 금관총에서 금관 및 금제 관식이 발견되며 처음 알려지게 되었다. 이후 1924년에 금령총에서, 1926년에 서봉총에서 잇달아 금관이 발굴되며 본격적인 관심을 받기 시작했다. 신라 금관들은 대부분 유사한 형태를 가지고 있는데, 이러한 모습을 샤먼의 관에 순록 뿔이 장식되던 것에 비유하여 샤머니즘적 권위를 나타낸 것이라는 의견이 1930년대에 처음 제안되었다.[2] 해방 이후의 한국 학계도 이러한 주장을 받아들여 연구를 계속 하고 있다."""
+
+    # Set the logging level for this test to DEBUG to capture all messages.
+    with caplog.at_level('DEBUG'):
+        llm_service = LLMServiceObjet() 
+        
+        # The function will make a real API call here.
+        llm_service.getMaterial(gold_crown_text)
+
+        # You can now access the logs captured by caplog.
+        print("\n--- Captured Logs ---")
+        print(caplog.text)
+        print("---------------------")
+    

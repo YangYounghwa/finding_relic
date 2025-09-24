@@ -106,7 +106,6 @@ class CodeConverter:
     
 
 materialConverter = CodeConverter()
-
 materialConverter.init_app(filepath=os.getenv('MATERIAL_CODE_PATH'))
 
 purposeConverter = CodeConverter()
