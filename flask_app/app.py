@@ -12,6 +12,8 @@ from google.auth.transport import requests
 from google.oauth2 import id_token
 
 from flask_jwt_extended import create_access_token, JWTManager, jwt_required, get_jwt_identity
+import logging
+logger = logging.getLogger(__name__)
 
 
 GOOGLE_CLIENT_ID = os.environ.get("GOOGLE_CLIENT_ID", "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com")
@@ -112,6 +114,6 @@ def create_app():
     @app.route("/test/searchText",methods=['POST'])
     def test_searchText():
         text= request.json.get("data")
-        
+
 
     return app

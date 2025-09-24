@@ -19,6 +19,10 @@ from langchain_community.callbacks import get_openai_callback
 from dotenv import load_dotenv
 load_dotenv()
 
+
+import logging
+logger = logging.getLogger(__name__)
+
 class LLMServiceObjet:
     
     def __init__(self):
@@ -36,7 +40,7 @@ class LLMServiceObjet:
 
     def isKorHisRelated(self,text:str)->KorRelation:
         
-        current_app.logger.debug("isKoreHistoryRelated().")
+        logger.debug("isKoreHistoryRelated().")
         # Checks the context and findout if it is related to korean history. 
         # If not, it will not be used for query
         # result = {"related": True, "error": False}
@@ -63,17 +67,17 @@ class LLMServiceObjet:
         with get_openai_callback() as cb:
             try:
                 relation = chain.invoke({'query': text})
-                current_app.logger.debug(f"relation.related:{relation.related}")
+                logger.debug(f"relation.related:{relation.related}")
                 
             except OutputParserException as e:
-                current_app.logger.debug(f"Failed to parse LLM response")
-                current_app.logger.debug(f"Arguments {e.args[0]}")
+                logger.debug(f"Failed to parse LLM response")
+                logger.debug(f"Arguments {e.args[0]}")
                 relation = {"error": True}
         
         # Access the token counts after the LLM call
-        current_app.logger.info(f"Total Tokens: {cb.total_tokens}")
-        current_app.logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
-        current_app.logger.info(f"Completion Tokens: {cb.completion_tokens}")
+        logger.info(f"Total Tokens: {cb.total_tokens}")
+        logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
+        logger.info(f"Completion Tokens: {cb.completion_tokens}")
         return relation
     
     
@@ -109,18 +113,18 @@ Your response must be a single item from the list. Follow the specified format i
         with get_openai_callback() as cb:
             try:
                 nation:Nations = chain.invoke({"text": text})
-                current_app.logger.debug(f"relation.related:{nation.name}")
-                current_app.logger.debug(nation.model_dump_json())
+                logger.debug(f"relation.related:{nation.name}")
+                logger.debug(nation.model_dump_json())
                 
             except OutputParserException as e:
                 # TODO : priority low,  add fallback.
-                current_app.logger.debug(f"Failed to parse LLM response")
-                current_app.logger.debug(f"Arguments {e.args[0]}")
+                logger.debug(f"Failed to parse LLM response")
+                logger.debug(f"Arguments {e.args[0]}")
                 relation = {"error": True}
         # Access the token counts after the LLM call
-        current_app.logger.info(f"Total Tokens: {cb.total_tokens}")
-        current_app.logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
-        current_app.logger.info(f"Completion Tokens: {cb.completion_tokens}")
+        logger.info(f"Total Tokens: {cb.total_tokens}")
+        logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
+        logger.info(f"Completion Tokens: {cb.completion_tokens}")
         
         return nation
         
@@ -155,18 +159,18 @@ Your response must be a single item from the list. Follow the specified format i
         with get_openai_callback() as cb:
             try:
                 material:Material = chain.invoke({"text": text})
-                current_app.logger.debug(f"relation.related:{material.name}")
-                current_app.logger.debug(material.model_dump_json())
+                logger.debug(f"relation.related:{material.name}")
+                logger.debug(material.model_dump_json())
                 
             except OutputParserException as e:
                 # TODO : priority low,  add fallback.
-                current_app.logger.debug(f"Failed to parse LLM response")
-                current_app.logger.debug(f"Arguments {e.args[0]}")
+                logger.debug(f"Failed to parse LLM response")
+                logger.debug(f"Arguments {e.args[0]}")
                 relation = {"error": True}
         # Access the token counts after the LLM call
-        current_app.logger.info(f"Total Tokens: {cb.total_tokens}")
-        current_app.logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
-        current_app.logger.info(f"Completion Tokens: {cb.completion_tokens}")
+        logger.info(f"Total Tokens: {cb.total_tokens}")
+        logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
+        logger.info(f"Completion Tokens: {cb.completion_tokens}")
         
         return material
     
@@ -204,18 +208,18 @@ Your response must be a single item from the list. Follow the specified format i
         with get_openai_callback() as cb:
             try:
                 purpose:Purpose = chain.invoke({"text": text})
-                current_app.logger.debug(purpose.model_dump_json())
-                current_app.logger.debug(f"relation.related:{purpose.name}")    
+                logger.debug(purpose.model_dump_json())
+                logger.debug(f"relation.related:{purpose.name}")    
                 
             except OutputParserException as e:
                 # TODO : priority low,  add fallback.
-                current_app.logger.debug(f"Failed to parse LLM response")
-                current_app.logger.debug(f"Arguments {e.args[0]}")
+                logger.debug(f"Failed to parse LLM response")
+                logger.debug(f"Arguments {e.args[0]}")
                 relation = {"error": True}
         # Access the token counts after the LLM call
-        current_app.logger.info(f"Total Tokens: {cb.total_tokens}")
-        current_app.logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
-        current_app.logger.info(f"Completion Tokens: {cb.completion_tokens}")
+        logger.info(f"Total Tokens: {cb.total_tokens}")
+        logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
+        logger.info(f"Completion Tokens: {cb.completion_tokens}")
         
         return purpose
     

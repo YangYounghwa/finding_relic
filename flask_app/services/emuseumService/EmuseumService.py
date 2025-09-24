@@ -13,6 +13,8 @@ import xmltodict
 from flask_app.util.MuseumCodeTranslator import materialConverter, purposeConverter, nationalityConverter
 
 import requests
+import logging
+logger = logging.getLogger(__name__)
 
 
 
@@ -172,7 +174,7 @@ class EmuseumAPIService:
         json_data = xmltodict.parse(xml_content)
         
         # DEBUG LINE
-        current_app.logger.info(json_data)
+        logger.info(json_data)
         
         items = json_data.get('result', {}).get('list', {}).get('data', [])
         total_count_str = json_data.get('result', {}).get('totalCount', '0')
@@ -187,7 +189,7 @@ class EmuseumAPIService:
         elif isinstance(items, dict):
             if 'item' in items:
                 dict_items.append(self._item_list_to_dict(items['item']))
-        current_app.logger.info(f"list received. total count : {total_count}")
+        logger.info(f"list received. total count : {total_count}")
         return dict_items, total_count
     
     
@@ -217,7 +219,7 @@ class EmuseumAPIService:
     # I might need a query builder. 
     def getItemsByKeywords(self,name:str=None,author:str=None,
                            id:str=None,museumCode:str=None,
-                           nationalityCode:str=None,meterialCode:str=None,
+                           nationalityCode:str=None,materialCode:str=None,
                            purposeCode:str=None,sizeRangeCode:str=None,
                            placeLandCode:str=None,designationCode:str=None,
                            indexWord:str=None,pageNo:int=1,numOfRows:int=20)->BriefList:
@@ -232,8 +234,8 @@ class EmuseumAPIService:
             params['museumCode'] = museumCode
         if nationalityCode:
             params['nationalityCode'] = nationalityCode
-        if meterialCode:
-            params['meterialCode'] = meterialCode
+        if materialCode:
+            params['materialCode'] = materialCode
         if purposeCode:
             params['purposeCode'] = purposeCode
         if sizeRangeCode:
@@ -299,12 +301,12 @@ class EmuseumAPIService:
                 purpose_priority,
                 material_priority
             )
-            current_app.logger.info(f"Successfully created DetailInfo DTO with dynamic key mapping:")
-            current_app.logger.info(detail_info_dto.model_dump_json(indent=2))
+            logger.info(f"Successfully created DetailInfo DTO with dynamic key mapping:")
+            logger.info(detail_info_dto.model_dump_json(indent=2))
             return detail_info_dto
             
         except Exception as e:
-            current_app.logger.info(f"An error occurred: {e}")
+            logger.info(f"An error occurred: {e}")
             return None
 
         

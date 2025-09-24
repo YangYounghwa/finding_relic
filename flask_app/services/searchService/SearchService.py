@@ -1,5 +1,6 @@
 
 import concurrent.futures
+
 from typing import List
 from flask_app.dto.EmuseumDTO import BriefList
 from flask_app.dto.llmserviceDTO import KorRelation, Material, Nations, Purpose
@@ -10,13 +11,17 @@ from flask import Flask
 
 from flask_app.util.MuseumCodeTranslator import materialConverter, purposeConverter, nationalityConverter
 
+import logging
+logger = logging.getLogger(__name__)
+
+
 class SearchServiceObject:
     
     def __init__(self):
         pass
         
     
-    def getItemList(self,text:str):
+    def getItemList(self,text:str)->BriefList:
         relation:KorRelation = llmService.isKorHisRelated(text)
         if not relation.related:
             return []
@@ -33,7 +38,7 @@ class SearchServiceObject:
             material:Material = future_material.result()
 
         # case 1
-        queryList = List()
+        queryList = []
         argDict = {}
         argDict['nation'] = nation.name
         argDict['purpose'] = purpose.name
@@ -77,9 +82,9 @@ class SearchServiceObject:
             argDict7['material'] = material.candidate
             queryList.append(argDict7)
         
-        # For each return list of 15, 
+        # For each return list of N
         # Does it have order? Emusuem might or mightnot have order.
-        my_brief_list = BriefList(totalCount=0, brief_info_list=[])
+        my_brief_list:BriefList = BriefList(totalCount=0, brief_info_list=[])
 
         for item in queryList:
             item['nation']

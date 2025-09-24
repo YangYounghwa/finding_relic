@@ -10,6 +10,9 @@ from pathlib import Path
 import csv
 import os
 
+import logging
+logger = logging.getLogger(__name__)
+
 class CodeConverter:
     """
     A class to handle data from a CSV file with columns 'code', 'parentCode', 'level', 'nameKr'.
