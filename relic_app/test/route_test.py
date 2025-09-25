@@ -28,7 +28,7 @@ def client(mock_flask_app):  # <-- CORRECTED LINE
     return mock_flask_app.test_client()
 
 
-@pytest.mark.skip(reason="Works well now.")
+# @pytest.mark.skip(reason="Works well now.")
 def test_search_text_success(client):
     """
     GIVEN a Flask application configured for testing
@@ -64,7 +64,7 @@ def test_search_text_success(client):
     print(f"Response data saved to search_text_response.json") 
 
 
-@pytest.mark.skip(reason="Works well now.")
+# @pytest.mark.skip(reason="Works well now.")
 def test_detail_info_with_query_params(client):
     """
 
