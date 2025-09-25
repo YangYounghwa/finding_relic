@@ -111,7 +111,7 @@ script_dir = Path(__file__).parent.resolve()
 
 material_file_path = script_dir / '..' / 'data' / "material_code.csv"
 purpose_file_path = script_dir / '..' / 'data' / 'purpose_code.csv'
-nationality_file_path = script_dir / '..' / 'data' / 'nationality_code.csv'
+nationality_file_path = script_dir / '..' / 'data' / 'nation_code.csv'
 museum_file_path = script_dir / '..' / 'data' / 'museum_code.csv'
 sizeRange_file_path = script_dir / '..' / 'data' / 'sizeRange_code.csv'
 
