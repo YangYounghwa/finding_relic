@@ -111,7 +111,18 @@ def create_app():
             return jsonify(message=f"Hello, internal user {user.id}!", google_id=user.google_id), 200
         else:
             return jsonify({"msg": "User not found"}), 404
+    
+    
+    
+    @app.route("/searchByText,methods=['POST']") 
+    @jwt_required()
+    def searchText():
+        text = request.json.get("data").get("text")
+        result:BriefList = searcher.getItemList(text)
         
+        responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
+        return jsonify(responseObj.model_dump())   
+    
     @app.route("/test/searchText",methods=['POST'])
     def test_searchText():
         text = request.json.get("data").get("text")
@@ -119,6 +130,20 @@ def create_app():
         
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
         return jsonify(responseObj.model_dump())
+    
+    
+    
+    
+    @app.route("/detailInfo",methods=['GET'])
+    def detailInfo():
+        id = request.args.get("id")  # CORRECTED LINE 
+    
+        detail:DetailInfo = emuseum.getDetailInfo(id)
+        result = DetailInfoList(detail_info_list=[detail])
+        responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
+        return jsonify(responseObj.model_dump())
+    
+    
     
     @app.route("/test/detailInfo",methods=['GET'])
     def test_detailInfo():
