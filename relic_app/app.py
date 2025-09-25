@@ -132,8 +132,10 @@ def create_app():
     @app.route("/test/userAdd",methods=['GET'])
     def test_userAdd():
         
-        google_id = request.json.get("google_id")
-            
+        google_id = request.args.get("google_id")
+        if not google_id:
+            return jsonify({"msg": "Google ID is missing"}), 400
+        
          
         user = User.query.filter_by(google_id=google_id).first()
         

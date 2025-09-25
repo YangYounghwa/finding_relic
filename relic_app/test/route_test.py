@@ -10,6 +10,7 @@ import os
 
 from pprint import pprint
 from flask import Flask
+import json
 
 
 
@@ -56,7 +57,11 @@ def test_search_text_success(client):
     assert response_data['success'] is True
     assert response_data['message'] == "Success"
     print(response_data['data'])
+       # Save the response data to a JSON file
+    with open('search_text_response.json', 'w', encoding='utf-8') as f:
+        json.dump(response_data, f, ensure_ascii=False, indent=4)
     
+    print(f"Response data saved to search_text_response.json") 
 
 
 @pytest.mark.skip(reason="Works well now.")
@@ -74,6 +79,10 @@ def test_detail_info_with_query_params(client):
     response_data = response.get_json()
     print(response_data)
     assert response_data['success'] is True
+    with open('detail_info_response.json', 'w', encoding='utf-8') as f:
+        json.dump(response_data, f, ensure_ascii=False, indent=4)
+    
+    print(f"Response data saved to detail_info_response.json")
     
     
 
@@ -81,7 +90,7 @@ def test_user_add(client):
     """
 
     """
-    response = client.get('/test/userAdd?google_id=1')
+    response = client.get('/test/userAdd"?google_id=1')
     print(response.get_json())
     
      
