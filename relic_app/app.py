@@ -129,26 +129,35 @@ def create_app():
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
         return jsonify(responseObj.model_dump())
     
-    @app.route("/test/userAdd",methods=['GET'])
-    def test_userAdd():
-        
+    @app.route("/test/userAdd", methods=['GET'])
+    def test_user_add():
+        """
+        Endpoint to add a user to the database.
+        """
         google_id = request.args.get("google_id")
         if not google_id:
+            # Return a 400 Bad Request if the Google ID is missing
             return jsonify({"msg": "Google ID is missing"}), 400
-        
-         
-        user = User.query.filter_by(google_id=google_id).first()
-        
-        if user:
-            return jsonify({"msg": "User already exists"}) 
-        if not user:
-            try: 
-                user = User(google_id=google_id)
-                db.session.add(user)
-                db.session.commit 
-                return jsonify({"msg": "User added successfully"}) 
-            except ValueError:
-                return jsonify({"msg": "Invalid Google ID token"}), 401
-         
 
+        user = User.query.filter_by(google_id=google_id).first()
+
+        if user:
+            return jsonify({"msg": "User already exists"})
+        else:
+            try:
+                new_user = User(google_id=google_id)
+                db.session.add(new_user)
+                # FIX: Added parentheses to correctly call the commit method
+                db.session.commit()
+                return jsonify({"msg": "User added successfully"})
+            except ValueError:
+                db.session.rollback()
+                return jsonify({"msg": "Invalid Google ID"}), 401
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(f"Error adding user: {e}")
+                return jsonify({"msg": "An error occurred while adding the user"}), 500
+         
+    with app.app_context():
+        db.create_all()
     return app
