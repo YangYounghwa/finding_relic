@@ -111,7 +111,12 @@ def create_app():
             return jsonify(message=f"Hello, internal user {user.id}!", google_id=user.google_id), 200
         else:
             return jsonify({"msg": "User not found"}), 404
-    
+        
+    @app.route("/test/jwtTokenTest",methods=['GET'])
+    @jwt_required()
+    def jwtTokenTest():
+        msg = {"msg":"Valid Token"}
+        return jsonify(msg)
     
     
     @app.route("/searchByText,methods=['POST']") 
