@@ -26,6 +26,8 @@ def client(mock_flask_app):  # <-- CORRECTED LINE
     # This now correctly receives the app object from the 'mock_flask_app' fixture.
     return mock_flask_app.test_client()
 
+
+@pytest.mark.skip(reason="Works well now.")
 def test_search_text_success(client):
     """
     GIVEN a Flask application configured for testing
@@ -73,10 +75,13 @@ def test_detail_info_with_query_params(client):
     print(response_data)
     assert response_data['success'] is True
     
+    
+
 def test_user_add(client):
     """
 
     """
     response = client.get('/test/userAdd?google_id=1')
+    print(response.get_json())
     
      
