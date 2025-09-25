@@ -6,7 +6,6 @@ from langchain.chains import LLMChain
 import os
 from typing import Dict
 
-from flask import current_app
 from langchain_openai import ChatOpenAI
 import logging
 from pydantic import BaseModel, Field
@@ -14,7 +13,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException 
 from langchain.prompts import PromptTemplate
 
-from relic_app.dto.llmserviceDTO import KorRelation, KoreanNationsEnum, Material_descriptions, Material, Nations, K_nation_descriptions, Purpose, Purpose_descriptions
+from relic_app.dto.llmserviceDTO import KorRelation, Material_descriptions, Material, Nations, K_nation_descriptions, Purpose, Purpose_descriptions
 from langchain_community.callbacks import get_openai_callback
 from dotenv import load_dotenv
 load_dotenv()
