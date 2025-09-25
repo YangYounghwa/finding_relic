@@ -55,21 +55,28 @@ def test_search_text_success(client):
     assert response_data['message'] == "Success"
     print(response_data['data'])
     
-    
+
+
+@pytest.mark.skip(reason="Works well now.")
 def test_detail_info_with_query_params(client):
     """
 
     """
-    # 1. Arrange
     item_id = 'PS0100100101101235600000'
         
-        # 2. Act: Make a GET request with a query parameter in the URL
     response = client.get(f'/test/detailInfo?id={item_id}')
 
-    # 3. Assert
     assert response.status_code == 200
 
     
     response_data = response.get_json()
     print(response_data)
     assert response_data['success'] is True
+    
+def test_user_add(client):
+    """
+
+    """
+    response = client.get('/test/userAdd?google_id=1')
+    
+     

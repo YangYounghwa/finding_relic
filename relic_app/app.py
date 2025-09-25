@@ -69,7 +69,7 @@ def create_app():
         google_id = db.Column(db.String(128), unique=True, nullable=False)
 
         def __repr__(self):
-            return f"<User {self.email}>"
+            return f"<User {self.id}>"
 
     
     @app.route("/google-login", methods=["POST"])
@@ -128,7 +128,25 @@ def create_app():
         result = DetailInfoList(detail_info_list=[detail])
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
         return jsonify(responseObj.model_dump())
+    
+    @app.route("/test/userAdd",methods=['GET'])
+    def test_userAdd():
         
+        google_id = request.json.get("google_id")
+            
+         
+        user = User.query.filter_by(google_id=google_id).first()
         
+        if user:
+            return jsonify({"msg": "User already exists"}) 
+        if not user:
+            try: 
+                user = User(google_id=google_id)
+                db.session.add(user)
+                db.session.commit 
+                return jsonify({"msg": "User added successfully"}) 
+            except ValueError:
+                return jsonify({"msg": "Invalid Google ID token"}), 401
+         
 
     return app
