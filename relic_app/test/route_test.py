@@ -90,7 +90,7 @@ def test_user_add(client):
     """
 
     """
-    response = client.get('/test/userAdd"?google_id=1')
+    response = client.get('/test/userAdd?google_id=1')
     print(response.get_json())
     
      
