@@ -18,9 +18,10 @@ from relic_app.services.emuseumService.EmuseumService import emuseum
 from relic_app.dto.EmuseumDTO import DetailInfoList
 
 
-from datetime import datetime
+from datetime import datetime, timezone
 from flask_sqlalchemy import SQLAlchemy
-
+from flask_apscheduler import APScheduler
+from sqlalchemy.orm import relationship
 import logging
 logger = logging.getLogger(__name__)
 
@@ -59,6 +60,13 @@ def create_app():
     "mysql+pymysql://root:password@localhost:3306/your_app_db"
 )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    
+    # Scheduler setup
+    scheduler = APScheduler()
+    scheduler.init_app(app)
+    scheduler.start()
+    
+    
     app.config['GOOGLE_CLIENT_ID'] = os.environ.get("GOOGLE_CLIENT_ID")
     app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY") 
     jwt = JWTManager(app)
@@ -68,9 +76,33 @@ def create_app():
     class User(db.Model):
         id = db.Column(db.Integer, primary_key=True)
         google_id = db.Column(db.String(128), unique=True, nullable=False)
+        search_query = relationship("SearchQuery", back_populates="user", uselist=False)
 
         def __repr__(self):
             return f"<User {self.id}>"
+
+    class SearchQuery(db.Model):
+        id = db.Column(db.Integer, primary_key=True)
+        user_id = db.Column(db.Integer, db.ForeignKey('user.id'), nullable=False)
+        queries_left = db.Column(db.Integer, default=10, nullable=False)
+        last_reset_timestamp = db.Column(db.DateTime, default=datetime.utcnow, nullable=False)
+        user = relationship("User", back_populates="search_query")
+        
+        
+    
+    @scheduler.task('cron', id='reset_daily_searches',hour=0)
+    def reset_daily_searches():
+        with app.app_context:
+            try:
+                search_queires = SearchQuery.query.all()
+                for sq in search_queires:
+                    sq.queries_left = 20
+                    sq.last_reset_timestamp = datetime.now(timezone.utc)
+                db.session.commit()
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(f"Error resetting daily searches: {e}")
+                
 
     
     @app.route("/google-login", methods=["POST"])
@@ -120,24 +152,41 @@ def create_app():
         return jsonify(msg)
     
     
-    @app.route("/searchByText,methods=['POST']") 
+    @app.route("/searchByText", methods=['POST'])
     @jwt_required()
     def searchText():
-        text = request.json.get("data").get("text")
-        result:BriefList = searcher.getItemList(text)
+        current_user_google_id = get_jwt_identity()
+        user = User.query.filter_by(google_id=current_user_google_id).first()
         
-        responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
-        return jsonify(responseObj.model_dump())   
-    
-    @app.route("/test/searchText",methods=['POST'])
-    def test_searchText():
+        if not user:
+            return jsonify({"msg": "User not found"}), 404
+
+        if not user.search_query:
+            search_query = SearchQuery(user_id=user.id)
+            db.session.add(search_query)
+            db.session.commit()
+            # Refresh the user object to get the new search_query relationship
+            db.session.refresh(user)
+
+
+        if user.search_query.queries_left <= 0:
+            return jsonify({"msg": "No search queries left"}), 403
+
         text = request.json.get("data").get("text")
-        result:BriefList = searcher.getItemList(text)
         
-        responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
-        return jsonify(responseObj.model_dump())
-    
-    
+        try:
+            user.search_query.queries_left -= 1
+            db.session.commit()
+
+            result: BriefList = searcher.getItemList(text)
+            
+            responseObj = APIResponse(message="Success", success=True, userId=user.id, data=result)
+            return jsonify(responseObj.model_dump())
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"An error occurred during search: {e}")
+            return jsonify({"msg": "An error occurred during the search process"}), 500
+
     
     
     @app.route("/detailInfo",methods=['GET'])
