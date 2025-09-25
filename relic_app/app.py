@@ -60,7 +60,8 @@ def create_app():
 )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
     app.config['GOOGLE_CLIENT_ID'] = os.environ.get("GOOGLE_CLIENT_ID")
-    
+    app.config["JWT_SECRET_KEY"] = os.getenv("JWT_SECRET_KEY") 
+    jwt = JWTManager(app)
     
     
     db = SQLAlchemy(app)
