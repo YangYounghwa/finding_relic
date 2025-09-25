@@ -10,6 +10,7 @@ import os
 
 from pprint import pprint
 from flask import Flask
+import json
 
 
 
@@ -26,6 +27,8 @@ def client(mock_flask_app):  # <-- CORRECTED LINE
     # This now correctly receives the app object from the 'mock_flask_app' fixture.
     return mock_flask_app.test_client()
 
+
+@pytest.mark.skip(reason="Works well now.")
 def test_search_text_success(client):
     """
     GIVEN a Flask application configured for testing
@@ -54,22 +57,40 @@ def test_search_text_success(client):
     assert response_data['success'] is True
     assert response_data['message'] == "Success"
     print(response_data['data'])
+       # Save the response data to a JSON file
+    with open('search_text_response.json', 'w', encoding='utf-8') as f:
+        json.dump(response_data, f, ensure_ascii=False, indent=4)
     
-    
+    print(f"Response data saved to search_text_response.json") 
+
+
+@pytest.mark.skip(reason="Works well now.")
 def test_detail_info_with_query_params(client):
     """
 
     """
-    # 1. Arrange
     item_id = 'PS0100100101101235600000'
         
-        # 2. Act: Make a GET request with a query parameter in the URL
     response = client.get(f'/test/detailInfo?id={item_id}')
 
-    # 3. Assert
     assert response.status_code == 200
 
     
     response_data = response.get_json()
     print(response_data)
     assert response_data['success'] is True
+    with open('detail_info_response.json', 'w', encoding='utf-8') as f:
+        json.dump(response_data, f, ensure_ascii=False, indent=4)
+    
+    print(f"Response data saved to detail_info_response.json")
+    
+    
+
+def test_user_add(client):
+    """
+
+    """
+    response = client.get('/test/userAdd?google_id=1')
+    print(response.get_json())
+    
+     

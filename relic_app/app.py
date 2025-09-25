@@ -69,7 +69,7 @@ def create_app():
         google_id = db.Column(db.String(128), unique=True, nullable=False)
 
         def __repr__(self):
-            return f"<User {self.email}>"
+            return f"<User {self.id}>"
 
     
     @app.route("/google-login", methods=["POST"])
@@ -112,6 +112,22 @@ def create_app():
         else:
             return jsonify({"msg": "User not found"}), 404
         
+    @app.route("/test/jwtTokenTest",methods=['GET'])
+    @jwt_required()
+    def jwtTokenTest():
+        msg = {"msg":"Valid Token"}
+        return jsonify(msg)
+    
+    
+    @app.route("/searchByText,methods=['POST']") 
+    @jwt_required()
+    def searchText():
+        text = request.json.get("data").get("text")
+        result:BriefList = searcher.getItemList(text)
+        
+        responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
+        return jsonify(responseObj.model_dump())   
+    
     @app.route("/test/searchText",methods=['POST'])
     def test_searchText():
         text = request.json.get("data").get("text")
@@ -119,6 +135,20 @@ def create_app():
         
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
         return jsonify(responseObj.model_dump())
+    
+    
+    
+    
+    @app.route("/detailInfo",methods=['GET'])
+    def detailInfo():
+        id = request.args.get("id")  # CORRECTED LINE 
+    
+        detail:DetailInfo = emuseum.getDetailInfo(id)
+        result = DetailInfoList(detail_info_list=[detail])
+        responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
+        return jsonify(responseObj.model_dump())
+    
+    
     
     @app.route("/test/detailInfo",methods=['GET'])
     def test_detailInfo():
@@ -128,7 +158,36 @@ def create_app():
         result = DetailInfoList(detail_info_list=[detail])
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
         return jsonify(responseObj.model_dump())
-        
-        
+    
+    @app.route("/test/userAdd", methods=['GET'])
+    def test_user_add():
+        """
+        Endpoint to add a user to the database.
+        """
+        google_id = request.args.get("google_id")
+        if not google_id:
+            # Return a 400 Bad Request if the Google ID is missing
+            return jsonify({"msg": "Google ID is missing"}), 400
 
+        user = User.query.filter_by(google_id=google_id).first()
+
+        if user:
+            return jsonify({"msg": "User already exists"})
+        else:
+            try:
+                new_user = User(google_id=google_id)
+                db.session.add(new_user)
+                # FIX: Added parentheses to correctly call the commit method
+                db.session.commit()
+                return jsonify({"msg": "User added successfully"})
+            except ValueError:
+                db.session.rollback()
+                return jsonify({"msg": "Invalid Google ID"}), 401
+            except Exception as e:
+                db.session.rollback()
+                app.logger.error(f"Error adding user: {e}")
+                return jsonify({"msg": "An error occurred while adding the user"}), 500
+         
+    with app.app_context():
+        db.create_all()
     return app
