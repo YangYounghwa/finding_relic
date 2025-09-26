@@ -110,8 +110,8 @@ class SearchServiceObject:
             if nationCode is None and purposeCode is None and materialCode is None:
                 logger.debug("SearchService, no code found")
                 continue 
-            temp_brief_list = emuseum.getItemsByKeywords(nationalityCode=nationCode, purposeCode=purposeCode, materialCode=materialCode)
-            logger.debug(f"temp_brief_list.total_count:{temp_brief_list.total_count}")
+            temp_brief_list:BriefList = emuseum.getItemsByKeywords(nationalityCode=nationCode, purposeCode=purposeCode, materialCode=materialCode)
+            logger.debug(f"temp_brief_list.totalCount:{temp_brief_list.totalCount}")
             
             my_brief_list.add_brief_list(temp_brief_list)
          

@@ -201,7 +201,7 @@ def create_app():
 
 
             result: BriefList = searcher.getItemList(text)
-            app.logger.debug(f"result :  {result.total_count}") 
+            app.logger.debug(f"result :  {result.totalCount}") 
             
             if not result:
                 
