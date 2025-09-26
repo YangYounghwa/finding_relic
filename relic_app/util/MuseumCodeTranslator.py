@@ -92,7 +92,23 @@ class CodeConverter:
         Returns:
             str: The corresponding 'code' or None if not found.
         """
-        return self.name_to_code.get(nameKr)
+        if self.loaded==False:
+            # DEBUGGING: Log when a converter is called before initialization
+            logger.error(f"Converter not loaded when looking up '{nameKr}'")
+            return None
+        
+        cleaned_nameKr = nameKr.strip() # FIX 2: Strip whitespace from the input (LLM output)
+        result = self.name_to_code.get(cleaned_nameKr)
+        
+        if result is None:
+            # DEBUGGING: Log failure details
+            # Check the raw input string to see if it contains hidden chars
+            raw_input_repr = cleaned_nameKr.encode('unicode_escape')
+            logger.debug(f"Code conversion failed for input: '{cleaned_nameKr}' (Raw: {raw_input_repr})")
+            logger.debug(f"Input string length: {len(cleaned_nameKr)}. Source file: {Path(self.filepath).name}")
+            # This logic will now explicitly show you if the input string contains non-visible characters.
+
+        return result
 
     def code_to_parent(self, code):
         """

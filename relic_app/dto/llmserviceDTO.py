@@ -25,7 +25,7 @@ class KoreanNationsEnum(str, Enum):
     protoThreeKingdoms = "원삼국"
     nangang = "낙랑"
     goguryeobaekje = "고구려"
-    baekje = "벡제"
+    baekje = "백제"
     silla = "신라"
     gaya = "가야"
     threeKingdoms = "삼국"
