@@ -54,12 +54,12 @@ class SearchServiceObject:
         
         logger.debug(f"queryList:{queryList}")
          
-        # if(nation.candidate):
-        #     argDict2 ={}
-        #     argDict2['nation']= nation.candidate
-        #     argDict2['purpose'] = purpose.name
-        #     argDict2['material'] = material.name
-        #     queryList.append(argDict2)
+        if(nation.candidate):
+            argDict2 ={}
+            argDict2['nation']= nation.candidate
+            argDict2['purpose'] = purpose.name
+            argDict2['material'] = material.name
+            queryList.append(argDict2)
         # if(purpose.candidate):
         #     argDict3 ={}
         #     argDict3['nation']= nation.name
@@ -107,7 +107,7 @@ class SearchServiceObject:
             logger.debug(f"nationCode:{nationCode}")
             logger.debug(f"purposeCode:{purposeCode}")
             logger.debug(f"materialCode:{materialCode}")
-            if ( nationCode == None & purposeCode == None & materialCode == None):
+            if nationCode is None and purposeCode is None and materialCode is None:
                 logger.debug("SearchService, no code found")
                 continue 
             temp_brief_list = emuseum.getItemsByKeywords(nationalityCode=nationCode, purposeCode=purposeCode, materialCode=materialCode)
