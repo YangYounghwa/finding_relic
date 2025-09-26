@@ -13,7 +13,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException 
 from langchain.prompts import PromptTemplate
 
-from relic_app.dto.llmserviceDTO import KorRelation, Material_descriptions, Material, Nations, K_nation_descriptions, Purpose, Purpose_descriptions, relicName
+from relic_app.dto.llmserviceDTO import KorRelation, Material_descriptions, Material, Nations, K_nation_descriptions, Purpose, Purpose_descriptions, RelicName
 from langchain_community.callbacks import get_openai_callback
 from dotenv import load_dotenv
 load_dotenv()
@@ -224,12 +224,13 @@ Your response must be a single item from the list. Follow the specified format i
         logger.info(f"Completion Tokens: {cb.completion_tokens}")
         
         return purpose
-    def getName(self,text:str)->relicName: 
+    def getName(self,text:str)->RelicName: 
         logger.debug("getName(). prompt created.")
         
-        parser = PydanticOutputParser(pydantic_object=relicName)
+        parser = PydanticOutputParser(pydantic_object=RelicName)
 
-        template="""글을 읽고 해당 유물 혹은 글에서 언급되는 유물의 이름을 알려줘. 답변은 이름 한개면 충분해.
+        template="""글을 읽고 해당 유물 혹은 글에서 언급되는 유물의 이름을 알려줘. 이름을 찾고 가능하면 이름 후보도 찾아서 적어, 또한 각각 확실하면 true이고 불확실하면 false으로 해줘.
+        유물의 이름은 name, 후보는 candidate 자리에 적어줘. Each name should be one word.
         
         {format_instructions}
 
@@ -253,7 +254,7 @@ Your response must be a single item from the list. Follow the specified format i
         
         with get_openai_callback() as cb:
             try:
-                name:relicName = chain.invoke({"text": text})
+                name:RelicName = chain.invoke({"text": text})
                 ###
                 logger.debug(name.model_dump_json())
                 logger.debug(f"relicName.name:{name.name}")    
@@ -263,7 +264,7 @@ Your response must be a single item from the list. Follow the specified format i
                 logger.debug(f"Failed to parse LLM response")
                 logger.debug(f"Arguments {e.args[0]}")
                 # Provide a default instance with certainty set to False
-                name = relicName(name="", certainty=False, candidateName=None, candidate_certainty=False)
+                # name = RelicName(name="", certainty=False, candidate=None, candidate_certainty=False)
                 
         # Access the token counts after the LLM call
         logger.info(f"Total Tokens: {cb.total_tokens}")

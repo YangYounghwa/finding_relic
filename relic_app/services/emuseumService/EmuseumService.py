@@ -179,10 +179,22 @@ class EmuseumAPIService:
             return None # Return None on failure
 
         # DEBUG LINE
-        logger.info(json_data)
+        logger.info(json_data.keys)
         
-        items = json_data.get('result', {}).get('list', {}).get('data', [])
-        total_count_str = json_data.get('result', {}).get('totalCount', '0')
+        # TODO : manage errors when expected key does not exist.
+        
+        result_data = json_data.get('result', {})
+        if not isinstance(result_data, dict):
+            logger.warning(f"API response missing 'result' dictionary.")
+            return [],0
+        list_data = result_data.get('list')
+        if not isinstance(list_data, dict):
+            logger.warning(f"API response missing 'list' dictionary. Response: {json_data}")
+            return [], 0
+
+        items = list_data.get('data', [])
+        total_count_str = result_data.get('totalCount', '0')
+
         total_count = int(total_count_str) if total_count_str.isdigit() else 0
         
         dict_items = []
