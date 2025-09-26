@@ -37,14 +37,14 @@ def create_app():
     app = Flask(__name__)
     from flask.logging import default_handler
     
-    # Logging added
-    app.logger.removeHandler(default_handler)
-    handler = logging.StreamHandler()
-    formatter = logging.Formatter('%(asctime)s - %(name)s - %(levelname)s - %(message)s')
-    handler.setFormatter(formatter)
-    app.logger.addHandler(handler)
-    app.logger.setLevel(logging.DEBUG)
-    # app.logger.setLevel(logging.DEBUG)
+    # When running through Gunicorn, Flask's logger should integrate with Gunicorn's.
+    if __name__ != '__main__':
+        gunicorn_logger = logging.getLogger('gunicorn.error')
+        app.logger.handlers = gunicorn_logger.handlers
+        app.logger.setLevel(gunicorn_logger.level)
+    else:
+        # This part is for running directly with 'flask run' for local development
+        app.logger.setLevel(logging.DEBUG)
 
     CORS(app)
 
