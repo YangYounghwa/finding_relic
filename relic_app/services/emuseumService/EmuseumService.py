@@ -249,6 +249,7 @@ class EmuseumAPIService:
             
         logger.debug(f"params:{params}")
         
+        
 
         apiRoute = "/relic/list" 
         raw_items, total_count = self._makeRequests(apiRoute, params, pageNo=pageNo, numOfRows=numOfRows)
