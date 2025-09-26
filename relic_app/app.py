@@ -1,7 +1,7 @@
 
 import os
 
-from flask import Flask, jsonify, request
+from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 
 from dotenv import load_dotenv
@@ -60,6 +60,14 @@ def create_app():
     "mysql+pymysql://root:password@localhost:3306/your_app_db"
 )
     app.config['SQLALCHEMY_TRACK_MODIFICATIONS'] = False
+    if os.getenv("TEST_MODE")=="True":
+        app.config['TEST_MODE'] = True
+    else:
+        app.config['TEST_MODE'] = False
+        
+        
+    app.logger.debug(f"TEST_MODE:{app.config['TEST_MODE']}")
+    
     
     # Scheduler setup
     scheduler = APScheduler()
@@ -92,7 +100,7 @@ def create_app():
     
     @scheduler.task('cron', id='reset_daily_searches',hour=0)
     def reset_daily_searches():
-        with app.app_context(): # ✅ CORRECT: app_context() is called as a method
+        with app.app_context():
             try:
                 search_queires = SearchQuery.query.all()
                 for sq in search_queires:
@@ -129,8 +137,25 @@ def create_app():
         
         except ValueError:
             return jsonify({"msg": "Invalid Google ID token"}), 401
+
+    @app.route("/test/token",methods=["POST"])
+    def test_token():
+        if app.config['TEST_MODE'] != True:
+            abort(404)
         
         
+        token = request.json.get('test_token') 
+        if token == os.getenv("TEST_TOKEN"):
+            user = User.query.filter_by(google_id=token).first()
+            if not user:
+                user = User(google_id=token)
+                db.session.add(user)
+                db.session.commit()
+            access_token = create_access_token(identity=token)
+            return jsonify(access_token=access_token)
+            
+            
+             
     # Example of usr info from jwt
     @app.route("/protected", methods=["GET"])
     @jwt_required()
@@ -147,6 +172,8 @@ def create_app():
     @app.route("/test/jwtTokenTest",methods=['GET'])
     @jwt_required()
     def jwtTokenTest():
+        if app.config['TEST_MODE'] != True:
+            abort(404)
         msg = {"msg":"Valid Token"}
         return jsonify(msg)
     
@@ -161,7 +188,7 @@ def create_app():
             return jsonify({"msg": "User not found"}), 404
 
         if not user.search_query:
-            search_query = SearchQuery(user_id=user.id)
+            search_query = SearchQuery(user_id=user.id,queries_left=20)
             db.session.add(search_query)
             db.session.commit()
             # Refresh the user object to get the new search_query relationship
@@ -192,7 +219,8 @@ def create_app():
     @app.route("/test/searchByText", methods=['POST'])
     def searchTextTest():
 
-        
+        if app.config['TEST_MODE'] != True:
+            abort(404)
         text = request.json.get("data")
         app.logger.debug(f"text : {text}")
         result = None
@@ -217,7 +245,7 @@ def create_app():
     
     @app.route("/detailInfo",methods=['GET'])
     def detailInfo():
-        id = request.args.get("id")  # CORRECTED LINE 
+        id = request.args.get("id")  
     
         detail:DetailInfo = emuseum.getDetailInfo(id)
         result = DetailInfoList(detail_info_list=[detail])
@@ -228,7 +256,10 @@ def create_app():
     
     @app.route("/test/detailInfo",methods=['GET'])
     def test_detailInfo():
-        id = request.args.get("id")  # CORRECTED LINE
+        
+        if app.config['TEST_MODE'] != True:
+            abort(404)
+        id = request.args.get("id")  
 
         detail:DetailInfo = emuseum.getDetailInfo(id)
         result = DetailInfoList(detail_info_list=[detail])
@@ -240,6 +271,8 @@ def create_app():
         """
         Endpoint to add a user to the database.
         """
+        if app.config['TEST_MODE'] != True:
+            abort(404)
         google_id = request.args.get("google_id")
         if not google_id:
             # Return a 400 Bad Request if the Google ID is missing
