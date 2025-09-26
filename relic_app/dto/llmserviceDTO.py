@@ -96,16 +96,16 @@ class Purpose(BaseModel):
     name: PurposeEnum = Field(description="Type of the relic.")
     certainty: bool = Field(description="Is it certain, if so True on first name")
     candidate: Optional[PurposeEnum] = Field(description="A candidate type of the relic.")
-    candidate_certainty: bool = Field(description="The candidate certain as well")
+    candidate_certainty: bool = Field(description="If you are certain about the candidate, mark as true")
     
     
     
     
-class relicName(BaseModel):
+class RelicName(BaseModel):
     name:str = Field("Name of the Relic")
-    certainty: bool = Field(description="Is it certain, if so True on first name")
-    candidateName: Optional[str] = Field("A candidate name of the relic")
-    candidate_certainty: bool = Field(description="The candidate certain as well")
+    certainty: bool = Field(description="Is name of the relic certain, if so True on certanity.")
+    candidate: Optional[str] = Field("A candidate name of the relic")
+    candidate_certainty: bool = Field(description="If you are certain about the candidate, mark as true ")
 
 
 class Purpose_descriptions:
