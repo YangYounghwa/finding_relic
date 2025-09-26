@@ -224,7 +224,7 @@ def create_app():
             db.session.commit()
 
             result: BriefList = searcher.getItemList(text)
-            if result:
+            if not result:
                 app.logger.debug(f"result :  {result.totalCount}") 
                 return jsonify({"msg":"No result found"}), 500
             
