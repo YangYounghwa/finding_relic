@@ -171,7 +171,7 @@ def create_app():
         if user.search_query.queries_left <= 0:
             return jsonify({"msg": "No search queries left"}), 403
 
-        text = request.json.get("data").get("text")
+        text = request.json.get("data")
         
         try:
             user.search_query.queries_left -= 1
