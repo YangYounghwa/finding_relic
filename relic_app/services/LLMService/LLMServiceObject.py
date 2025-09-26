@@ -230,7 +230,7 @@ Your response must be a single item from the list. Follow the specified format i
         parser = PydanticOutputParser(pydantic_object=RelicName)
 
         template="""글을 읽고 해당 유물 혹은 글에서 언급되는 유물의 이름을 알려줘. 이름을 찾고 가능하면 이름 후보도 찾아서 적어, 또한 각각 확실하면 true이고 불확실하면 false으로 해줘.
-        유물의 이름은 name, 후보는 candidate 자리에 적어줘.
+        유물의 이름은 name, 후보는 candidate 자리에 적어줘. Each name should be one word.
         
         {format_instructions}
 
