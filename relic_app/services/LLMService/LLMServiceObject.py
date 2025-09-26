@@ -264,7 +264,7 @@ Your response must be a single item from the list. Follow the specified format i
                 logger.debug(f"Failed to parse LLM response")
                 logger.debug(f"Arguments {e.args[0]}")
                 # Provide a default instance with certainty set to False
-                name = RelicName(name="", certainty=False, candidate=None, candidate_certainty=False)
+                # name = RelicName(name="", certainty=False, candidate=None, candidate_certainty=False)
                 
         # Access the token counts after the LLM call
         logger.info(f"Total Tokens: {cb.total_tokens}")

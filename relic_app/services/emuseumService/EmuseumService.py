@@ -179,8 +179,9 @@ class EmuseumAPIService:
             return None # Return None on failure
 
         # DEBUG LINE
-        logger.info(json_data)
+        logger.info(json_data.keys)
         
+        # TODO : manage errors when expected key does not exist.
         items = json_data.get('result', {}).get('list', {}).get('data', [])
         total_count_str = json_data.get('result', {}).get('totalCount', '0')
         total_count = int(total_count_str) if total_count_str.isdigit() else 0
