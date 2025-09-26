@@ -189,6 +189,28 @@ def create_app():
             app.logger.error(f"An error occurred during search: {e}")
             return jsonify({"msg": "An error occurred during the search process"}), 500
 
+    @app.route("/test/searchByText", methods=['POST'])
+    def searchTextTest():
+
+        
+        text = request.json.get("data")
+        app.logger.debug(f"text : {text}")
+        
+        try:
+
+
+            result: BriefList = searcher.getItemList(text)
+            if result:
+                app.logger.debug(f"result :  {result.total_count}") 
+                return jsonify({"msg":"No result found"}), 500
+            
+            responseObj = APIResponse(message="Success", success=True, userId=1, data=result)
+            return jsonify(responseObj.model_dump())
+        except Exception as e:
+            db.session.rollback()
+            app.logger.error(f"An error occurred during search: {e}")
+            return jsonify({"msg": "An error occurred during the search process"}), 500
+
     
     
     @app.route("/detailInfo",methods=['GET'])

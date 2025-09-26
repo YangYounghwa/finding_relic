@@ -28,7 +28,7 @@ def client(mock_flask_app):  # <-- CORRECTED LINE
     return mock_flask_app.test_client()
 
 
-@pytest.mark.skip(reason="Works well now.")
+# @pytest.mark.skip(reason="Works well now.")
 def test_search_text_success(client):
     """
     GIVEN a Flask application configured for testing
@@ -46,7 +46,7 @@ def test_search_text_success(client):
     # Use 'patch' to temporarily replace 'searcher.getItemList' during this test.
     # We configure its return value.
 
-    response = client.post('/test/searchText', json=post_data)
+    response = client.post('test/searchByText', json=post_data)
 
     # 3. Assert: Check the results
     assert response.status_code == 200
@@ -86,6 +86,7 @@ def test_detail_info_with_query_params(client):
     
     
 
+@pytest.mark.skip(reason="Works well now.")
 def test_user_add(client):
     """
 

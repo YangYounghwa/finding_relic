@@ -156,7 +156,7 @@ Your response must be a single item from the list. Follow the specified format i
         llm = self.llm_nano_cold
         # llm = self.llm_mini_cold
         chain = prompt | llm | parser
-        
+        material = None
         with get_openai_callback() as cb:
             try:
                 material:Material = chain.invoke({"text": text})
@@ -205,6 +205,7 @@ Your response must be a single item from the list. Follow the specified format i
         llm = self.llm_nano_cold
         # llm = self.llm_mini_cold
         chain = prompt | llm | parser
+        purpose = None
         
         with get_openai_callback() as cb:
             try:
