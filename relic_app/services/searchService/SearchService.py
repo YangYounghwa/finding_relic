@@ -37,11 +37,11 @@ class SearchServiceObject:
 
             # Retrieve the results. .result() will block until the task is complete.
             nation:Nations = future_nation.result()
-            logger.log(f"nation:{nation.name}")
+            logger.debug(f"nation:{nation.name}")
             purpose:Purpose = future_purpose.result()
-            logger.log(f"purpose:{purpose.name}")
+            logger.debug(f"purpose:{purpose.name}")
             material:Material = future_material.result()
-            logger.log(f"material:{material.name}")
+            logger.debug(f"material:{material.name}")
         
         
         # case 1
@@ -52,42 +52,42 @@ class SearchServiceObject:
         argDict['material'] = material.name
         queryList.append(argDict)
          
-        if(nation.candidate):
-            argDict2 ={}
-            argDict2['nation']= nation.candidate
-            argDict2['purpose'] = purpose.name
-            argDict2['material'] = material.name
-            queryList.append(argDict2)
-        if(purpose.candidate):
-            argDict3 ={}
-            argDict3['nation']= nation.name
-            argDict3['purpose'] = purpose.candidate
-            argDict3['material'] = material.name
-            queryList.append(argDict3)
-        if(material.candidate):
-            argDict4 ={}
-            argDict4['nation']= nation.name
-            argDict4['purpose'] = purpose.name
-            argDict4['material'] = material.candidate
-            queryList.append(argDict4)
-        if(nation.candidate and purpose.candidate):
-            argDict5 ={}
-            argDict5['nation']= nation.candidate
-            argDict5['purpose'] = purpose.candidate
-            argDict5['material'] = material.name
-            queryList.append(argDict5)
-        if(nation.candidate and material.candidate):
-            argDict6 ={}
-            argDict6['nation']= nation.candidate
-            argDict6['purpose'] = purpose.name
-            argDict6['material'] = material.candidate
-            queryList.append(argDict6)
-        if(purpose.candidate and material.candidate):
-            argDict7 ={}
-            argDict7['nation']= nation.name
-            argDict7['purpose'] = purpose.candidate
-            argDict7['material'] = material.candidate
-            queryList.append(argDict7)
+        # if(nation.candidate):
+        #     argDict2 ={}
+        #     argDict2['nation']= nation.candidate
+        #     argDict2['purpose'] = purpose.name
+        #     argDict2['material'] = material.name
+        #     queryList.append(argDict2)
+        # if(purpose.candidate):
+        #     argDict3 ={}
+        #     argDict3['nation']= nation.name
+        #     argDict3['purpose'] = purpose.candidate
+        #     argDict3['material'] = material.name
+        #     queryList.append(argDict3)
+        # if(material.candidate):
+        #     argDict4 ={}
+        #     argDict4['nation']= nation.name
+        #     argDict4['purpose'] = purpose.name
+        #     argDict4['material'] = material.candidate
+        #     queryList.append(argDict4)
+        # if(nation.candidate and purpose.candidate):
+        #     argDict5 ={}
+        #     argDict5['nation']= nation.candidate
+        #     argDict5['purpose'] = purpose.candidate
+        #     argDict5['material'] = material.name
+        #     queryList.append(argDict5)
+        # if(nation.candidate and material.candidate):
+        #     argDict6 ={}
+        #     argDict6['nation']= nation.candidate
+        #     argDict6['purpose'] = purpose.name
+        #     argDict6['material'] = material.candidate
+        #     queryList.append(argDict6)
+        # if(purpose.candidate and material.candidate):
+        #     argDict7 ={}
+        #     argDict7['nation']= nation.name
+        #     argDict7['purpose'] = purpose.candidate
+        #     argDict7['material'] = material.candidate
+        #     queryList.append(argDict7)
         
         # For each return list of N
         # Does it have order? Emusuem might or mightnot have order.
