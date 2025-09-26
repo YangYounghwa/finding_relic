@@ -163,16 +163,21 @@ class EmuseumAPIService:
         return {entry['@key']: entry['@value'] for entry in item_list if '@key' in entry and '@value' in entry}
 
     
-    def _makeRequests(self, apiRoute: str, params: Dict, pageNo: int = 1, numOfRows: int = 10) -> tuple[list, int]:
+    def _makeRequests(self, apiRoute: str, params: Dict, pageNo: int = 1, numOfRows: int = 10) -> tuple[list, int] | None:
         # makes requets and returns the content. 
         params["serviceKey"] = self.apiKey
         params["pageNo"] = pageNo
         params["numOfRows"] = numOfRows
         
-        response = requests.get(self.emuseumURL + apiRoute, params)
-        xml_content = response.content
-        json_data = xmltodict.parse(xml_content)
-        
+        try:
+            response = requests.get(self.emuseumURL + apiRoute, params, timeout=10) # Added timeout
+            response.raise_for_status()  # Raise an exception for bad status codes
+            xml_content = response.content
+            json_data = xmltodict.parse(xml_content)
+        except (requests.exceptions.RequestException, xmltodict.expat.ExpatError) as e:
+            logger.error(f"API request or XML parsing failed: {e}")
+            return None # Return None on failure
+
         # DEBUG LINE
         logger.info(json_data)
         
@@ -248,12 +253,17 @@ class EmuseumAPIService:
             params['indexWord'] = indexWord
             
         logger.debug(f"params:{params}")
-        
-        
 
         apiRoute = "/relic/list" 
-        raw_items, total_count = self._makeRequests(apiRoute, params, pageNo=pageNo, numOfRows=numOfRows)
-        # This total_count means possible results in the API, not returned counts.  
+        
+        # Call _makeRequests and handle potential failure
+        request_result = self._makeRequests(apiRoute, params, pageNo=pageNo, numOfRows=numOfRows)
+        if request_result is None:
+            logger.warning("API call failed or returned no data. Returning empty BriefList.")
+            return BriefList(totalCount=0, brief_info_list=[])
+        
+        raw_items, total_count = request_result
+        
         brief_info_list = []
         
         
@@ -262,9 +272,8 @@ class EmuseumAPIService:
             nationality_name = nationalityConverter.code_to_nameKr(item.get('nationalityCode'))
             
             # Slice purposeCode into first 10 chars. 
-            
-            
-            purposeCodeSlice = item.get('purposeCode')[:10]
+            purpose_code = item.get('purposeCode')
+            purposeCodeSlice = purpose_code[:10] if purpose_code else None
             purpose_name = purposeConverter.code_to_nameKr(purposeCodeSlice)
             material_name = materialConverter.code_to_nameKr(item.get('materialCode'))
             
