@@ -246,15 +246,26 @@ class EmuseumAPIService:
             params['designationCode'] = designationCode
         if indexWord:
             params['indexWord'] = indexWord
+            
+        logger.debug(f"params:{params}")
+        
+        
 
         apiRoute = "/relic/list" 
         raw_items, total_count = self._makeRequests(apiRoute, params, pageNo=pageNo, numOfRows=numOfRows)
         # This total_count means possible results in the API, not returned counts.  
         brief_info_list = []
+        
+        
         for item in raw_items:
             # Convert codes to human-readable names using the converters
             nationality_name = nationalityConverter.code_to_nameKr(item.get('nationalityCode'))
-            purpose_name = purposeConverter.code_to_nameKr(item.get('purposeCode'))
+            
+            # Slice purposeCode into first 10 chars. 
+            
+            
+            purposeCodeSlice = item.get('purposeCode')[:10]
+            purpose_name = purposeConverter.code_to_nameKr(purposeCodeSlice)
             material_name = materialConverter.code_to_nameKr(item.get('materialCode'))
             
             brief_info = BriefInfo(

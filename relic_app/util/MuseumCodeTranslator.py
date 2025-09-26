@@ -1,6 +1,3 @@
-
-
-
 # Code to str
 # str to code
 
@@ -40,36 +37,49 @@ class CodeConverter:
     def _load_data(self):
         """
         Internal method to load data from the CSV file into dictionaries for fast lookups.
+        FIX: Dynamically handles the corrupted 'code' column header created by the '' prefix.
         """
         try:
             with open(self.filepath, mode='r', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
+                
+                # FIX 1: Dynamically determine the correct key for the 'code' column.
+                # If the first fieldname starts with the prefix (e.g., 'code'), use that.
+                code_key_to_use = 'code'
+                if reader.fieldnames and reader.fieldnames[0].endswith('code'):
+                    code_key_to_use = reader.fieldnames[0]
+                
                 for row in reader:
-                    code = row.get('code')
+                    # Use the dynamically determined key for the 'code' column
+                    code = row.get(code_key_to_use)
                     nameKr = row.get('nameKr')
                     parentCode = row.get('parentCode')
 
+                    # This condition now passes because 'code' is correctly retrieved.
                     if code and nameKr:
+                        # FIX 2: Strip whitespace from CSV nameKr key (for robustness)
+                        nameKr = nameKr.strip() 
                         # Map code to all data for potential future use
                         self.code_to_name[code] = nameKr
                         
                     if nameKr and code:
-                        # Map nameKr to code
+                        # Dictionary now gets populated here.
                         self.name_to_code[nameKr] = code
 
                     if code and parentCode:
                         # Map code to its parentCode
                         self.code_to_parent[code] = parentCode
+            logger.debug(f"CodeConverter loaded {len(self.name_to_code)} names from {Path(self.filepath).name}")
 
         except FileNotFoundError:
-            print(f"Error: The file '{self.filepath}' was not found.")
+            logger.error(f"Error: The file '{self.filepath}' was not found.")
         except Exception as e:
-            print(f"An error occurred while reading the file: {e}")
+            logger.error(f"An error occurred while reading the file: {e}")
 
     def code_to_nameKr(self, code):
         """
         Converts a 'code' to its corresponding 'nameKr'.
-
+        
         Args:
             code (str): The code to look up.
 
@@ -92,26 +102,28 @@ class CodeConverter:
         Returns:
             str: The corresponding 'code' or None if not found.
         """
-        return self.name_to_code.get(nameKr)
+        if self.loaded==False:
+            logger.error(f"Converter not loaded when looking up '{nameKr}'")
+            return None
+        
+        # FIX 3: Strip whitespace from the input (LLM output) before lookup
+        cleaned_nameKr = nameKr.strip()
+        result = self.name_to_code.get(cleaned_nameKr)
+        
+        if result is None:
+            # DEBUGGING: Log failure details
+            raw_input_repr = cleaned_nameKr.encode('unicode_escape')
+            logger.debug(f"Code conversion failed for input: '{cleaned_nameKr}' (Raw: {raw_input_repr})")
+            logger.debug(f"Input string length: {len(cleaned_nameKr)}. Source file: {Path(self.filepath).name}")
 
-    def code_to_parent(self, code):
-        """
-        Converts a 'code' to its corresponding 'parentCode'.
-
-        Args:
-            code (str): The code to look up.
-
-        Returns:
-            str: The corresponding 'parentCode' or None if not found.
-        """
-        return self.code_to_parent.get(code)
+        return result
     
     
 script_dir = Path(__file__).parent.resolve()
 
 material_file_path = script_dir / '..' / 'data' / "material_code.csv"
 purpose_file_path = script_dir / '..' / 'data' / 'purpose_code.csv'
-nationality_file_path = script_dir / '..' / 'data' / 'nationality_code.csv'
+nationality_file_path = script_dir / '..' / 'data' / 'nation_code.csv'
 museum_file_path = script_dir / '..' / 'data' / 'museum_code.csv'
 sizeRange_file_path = script_dir / '..' / 'data' / 'sizeRange_code.csv'
 

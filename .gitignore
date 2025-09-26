@@ -89,3 +89,5 @@ media/
 
 samples/
 # relic_app/data/
+
+*test_result.txt

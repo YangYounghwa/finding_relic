@@ -25,7 +25,7 @@ class KoreanNationsEnum(str, Enum):
     protoThreeKingdoms = "원삼국"
     nangang = "낙랑"
     goguryeobaekje = "고구려"
-    baekje = "벡제"
+    baekje = "백제"
     silla = "신라"
     gaya = "가야"
     threeKingdoms = "삼국"
@@ -98,6 +98,15 @@ class Purpose(BaseModel):
     candidate: Optional[PurposeEnum] = Field(description="A candidate type of the relic.")
     candidate_certainty: bool = Field(description="The candidate certain as well")
     
+    
+    
+    
+class relicName(BaseModel):
+    name:str = Field("Name of the Relic")
+    certainty: bool = Field(description="Is it certain, if so True on first name")
+    candidateName: Optional[str] = Field("A candidate name of the relic")
+    candidate_certainty: bool = Field(description="The candidate certain as well")
+
 
 class Purpose_descriptions:
     purpose_descriptions = {

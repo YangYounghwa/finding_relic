@@ -6,7 +6,6 @@ from langchain.chains import LLMChain
 import os
 from typing import Dict
 
-from flask import current_app
 from langchain_openai import ChatOpenAI
 import logging
 from pydantic import BaseModel, Field
@@ -14,7 +13,7 @@ from langchain.output_parsers import PydanticOutputParser
 from langchain_core.exceptions import OutputParserException 
 from langchain.prompts import PromptTemplate
 
-from relic_app.dto.llmserviceDTO import KorRelation, KoreanNationsEnum, Material_descriptions, Material, Nations, K_nation_descriptions, Purpose, Purpose_descriptions
+from relic_app.dto.llmserviceDTO import KorRelation, Material_descriptions, Material, Nations, K_nation_descriptions, Purpose, Purpose_descriptions, relicName
 from langchain_community.callbacks import get_openai_callback
 from dotenv import load_dotenv
 load_dotenv()
@@ -48,7 +47,7 @@ class LLMServiceObjet:
 
         
         parser = PydanticOutputParser(pydantic_object=KorRelation)
-        template = """Read the text and check whether if the text is related to the Korean History, if so mark related as True, if not mark it false. If you are not sure on the result mark unsure as True, otherwise false.
+        template = """Read the text and check whether if the text is related to the Korean History or korean artefacts. It can be related to modern history., if so mark related as True, if not mark it false. If you are not sure on the result mark unsure as True, otherwise false.
         
         {format_instructions}
         
@@ -106,6 +105,8 @@ Your response must be a single item from the list. Follow the specified format i
                 "format_instructions": parser.get_format_instructions()
             }
         )
+        logger.debug("getNationality(). prompt created.")
+        nation = None
         llm = self.llm_nano_cold
         # llm = self.llm_mini_cold
         chain = prompt | llm | parser
@@ -155,7 +156,7 @@ Your response must be a single item from the list. Follow the specified format i
         llm = self.llm_nano_cold
         # llm = self.llm_mini_cold
         chain = prompt | llm | parser
-        
+        material = None
         with get_openai_callback() as cb:
             try:
                 material:Material = chain.invoke({"text": text})
@@ -180,7 +181,7 @@ Your response must be a single item from the list. Follow the specified format i
     def getPurpose(self, text:str)->Purpose:
         Purpose_descriptions.purpose_descriptions
         
-        # Step 3: Create an instance of the PydanticOutputParser
+
         parser = PydanticOutputParser(pydantic_object=Purpose)
         template="""글을 읽고 해당 유물 혹은 글 내용에서 유추할 수 있는 주 용도를 알려줘. 가장 간단한 기능을 우선하고 부차적인 것은 무시해.
         Here are the available options with brief descriptions: {options_with_descriptions}.
@@ -204,6 +205,7 @@ Your response must be a single item from the list. Follow the specified format i
         llm = self.llm_nano_cold
         # llm = self.llm_mini_cold
         chain = prompt | llm | parser
+        purpose = None
         
         with get_openai_callback() as cb:
             try:
@@ -222,6 +224,54 @@ Your response must be a single item from the list. Follow the specified format i
         logger.info(f"Completion Tokens: {cb.completion_tokens}")
         
         return purpose
+    def getName(self,text:str)->relicName: 
+        logger.debug("getName(). prompt created.")
+        
+        parser = PydanticOutputParser(pydantic_object=relicName)
+
+        template="""글을 읽고 해당 유물 혹은 글에서 언급되는 유물의 이름을 알려줘. 답변은 이름 한개면 충분해.
+        
+        {format_instructions}
+
+        Text: {text}
+        """
+        
+        prompt = PromptTemplate(
+            template=template,
+            input_variables=["text"],
+            partial_variables={
+                "format_instructions": parser.get_format_instructions()
+                # options_with_descriptions is not needed for free-form name extraction
+            }
+        )
+        
+        name = None
+        llm = self.llm_nano_cold
+        # llm = self.llm_mini_cold
+        chain = prompt | llm | parser
+    
+        
+        with get_openai_callback() as cb:
+            try:
+                name:relicName = chain.invoke({"text": text})
+                ###
+                logger.debug(name.model_dump_json())
+                logger.debug(f"relicName.name:{name.name}")    
+                
+            except OutputParserException as e:
+                # On failure, return a default object to maintain type integrity
+                logger.debug(f"Failed to parse LLM response")
+                logger.debug(f"Arguments {e.args[0]}")
+                # Provide a default instance with certainty set to False
+                name = relicName(name="", certainty=False, candidateName=None, candidate_certainty=False)
+                
+        # Access the token counts after the LLM call
+        logger.info(f"Total Tokens: {cb.total_tokens}")
+        logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
+        logger.info(f"Completion Tokens: {cb.completion_tokens}")
+        
+        
+        return name
     
     
 llmService = LLMServiceObjet()
