@@ -34,17 +34,21 @@ class SearchServiceObject:
             return BriefList(totalCount=0, brief_info_list=[])
 
         # 2. Get all attributes from the text in parallel (unchanged)
-        with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
-            future_nation = executor.submit(llmService.getNationality, text)
-            future_purpose = executor.submit(llmService.getPurpose, text)
-            future_material = executor.submit(llmService.getMaterial, text)
-            future_name = executor.submit(llmService.getName, text)
-            
-            nation: Nations = future_nation.result()
-            purpose: Purpose = future_purpose.result()
-            material: Material = future_material.result()
-            relicName: RelicName = future_name.result()
-
+        try:
+            with concurrent.futures.ThreadPoolExecutor(max_workers=5) as executor:
+                future_nation = executor.submit(llmService.getNationality, text)
+                future_purpose = executor.submit(llmService.getPurpose, text)
+                future_material = executor.submit(llmService.getMaterial, text)
+                future_name = executor.submit(llmService.getName, text)
+                
+                nation: Nations = future_nation.result()
+                purpose: Purpose = future_purpose.result()
+                material: Material = future_material.result()
+                relicName: RelicName = future_name.result()
+        except Exception as e:
+            logger.error(f"An LLM service call failed : {e}", exc_info=True)
+            return BriefList(totalCount=0,brief_info_list=[])
+        
         # 3. Build a list of all search arguments, prioritizing name searches
         search_args_list = []
         
@@ -96,13 +100,14 @@ class SearchServiceObject:
             
             for future in futures:
                 try:
-                    # .result() waits for the future to complete
                     temp_brief_list = future.result()
-                    if temp_brief_list:
+                    if temp_brief_list and temp_brief_list.brief_info_list:
                         logger.debug(f"Search found {temp_brief_list.totalCount} items.")
                         my_brief_list.add_brief_list(temp_brief_list)
                 except Exception as e:
-                    logger.error(f"A search query failed: {e}")
+                    logger.error(f"A museum API search query failed: {e}", exc_info=True)
+                    # Continue to the next future, so one failed query doesn't stop all of them
+                    continue
 
         return my_brief_list
      
