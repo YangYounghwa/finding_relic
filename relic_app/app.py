@@ -195,6 +195,7 @@ def create_app():
         
         text = request.json.get("data")
         app.logger.debug(f"text : {text}")
+        result = None
         
         try:
 

@@ -22,6 +22,8 @@ class SearchServiceObject:
         
     
     def getItemList(self,text:str)->BriefList:
+        
+        
         relation:KorRelation = llmService.isKorHisRelated(text)
         logger.debug(f"relation.related:{relation.related}")
         if not relation.related:
