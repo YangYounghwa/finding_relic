@@ -37,9 +37,13 @@ class SearchServiceObject:
 
             # Retrieve the results. .result() will block until the task is complete.
             nation:Nations = future_nation.result()
+            logger.log(f"nation:{nation.name}")
             purpose:Purpose = future_purpose.result()
+            logger.log(f"purpose:{purpose.name}")
             material:Material = future_material.result()
-
+            logger.log(f"material:{material.name}")
+        
+        
         # case 1
         queryList = []
         argDict = {}

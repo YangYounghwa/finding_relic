@@ -208,7 +208,6 @@ def create_app():
             responseObj = APIResponse(message="Success", success=True, userId=1, data=result)
             return jsonify(responseObj.model_dump())
         except Exception as e:
-            db.session.rollback()
             app.logger.error(f"An error occurred during search: {e}")
             return jsonify({"msg": "An error occurred during the search process"}), 500
 
