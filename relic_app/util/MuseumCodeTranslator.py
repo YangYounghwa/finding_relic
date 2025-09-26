@@ -40,17 +40,31 @@ class CodeConverter:
     def _load_data(self):
         """
         Internal method to load data from the CSV file into dictionaries for fast lookups.
+        FIX: Dynamically handles the corrupted 'code' column header created by the '' prefix.
         """
         try:
             with open(self.filepath, mode='r', encoding='utf-8') as file:
                 reader = csv.DictReader(file)
+                
+                code_key_to_use = 'code'
+                # Check the actual header row read by DictReader
+                if reader.fieldnames and reader.fieldnames[0].startswith('['):
+                    # The first column key is corrupted (e.g., 'code'), so we use that full key.
+                    code_key_to_use = reader.fieldnames[0]
+                # Else, we assume the key is the standard 'code'
+                
+                # --- Begin reading data rows ---
                 for row in reader:
-                    code = row.get('code')
+                    # Use the dynamically determined key for the 'code' column
+                    code = row.get(code_key_to_use)
+                    
+                    # 'nameKr' and 'parentCode' keys should be safe from the prefix issue
                     nameKr = row.get('nameKr')
                     parentCode = row.get('parentCode')
 
                     if code and nameKr:
                         # Map code to all data for potential future use
+                        nameKr = nameKr.strip() # Ensure CSV keys are clean
                         self.code_to_name[code] = nameKr
                         
                     if nameKr and code:
