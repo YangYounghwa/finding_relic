@@ -178,6 +178,9 @@ def create_app():
             db.session.commit()
 
             result: BriefList = searcher.getItemList(text)
+            if result:
+                app.logger.debug(f"result :  {result.total_count}") 
+                return jsonify({"msg":"No result found"}), 500
             
             responseObj = APIResponse(message="Success", success=True, userId=user.id, data=result)
             return jsonify(responseObj.model_dump())

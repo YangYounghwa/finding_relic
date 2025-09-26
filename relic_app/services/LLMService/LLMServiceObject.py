@@ -105,6 +105,8 @@ Your response must be a single item from the list. Follow the specified format i
                 "format_instructions": parser.get_format_instructions()
             }
         )
+        logger.debug("getNationality(). prompt created.")
+        nation = None
         llm = self.llm_nano_cold
         # llm = self.llm_mini_cold
         chain = prompt | llm | parser
