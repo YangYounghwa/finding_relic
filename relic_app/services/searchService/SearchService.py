@@ -51,6 +51,8 @@ class SearchServiceObject:
         argDict['purpose'] = purpose.name
         argDict['material'] = material.name
         queryList.append(argDict)
+        
+        logger.debug(f"queryList:{queryList}")
          
         # if(nation.candidate):
         #     argDict2 ={}
@@ -102,7 +104,13 @@ class SearchServiceObject:
             purposeCode = purposeConverter.nameKr_to_code(item['purpose'])
             materialCode = materialConverter.nameKr_to_code(item['material'])
             
+            logger.debug(f"nationCode:{nationCode}")
+            logger.debug(f"purposeCode:{purposeCode}")
+            logger.debug(f"materialCode:{materialCode}")
+            
             temp_brief_list = emuseum.getItemsByKeywords(nationalityCode=nationCode, purposeCode=purposeCode, materialCode=materialCode)
+            logger.debug(f"temp_brief_list.total_count:{temp_brief_list.total_count}")
+            
             my_brief_list.add_brief_list(temp_brief_list)
          
         return my_brief_list
