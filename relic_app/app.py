@@ -92,7 +92,7 @@ def create_app():
     
     @scheduler.task('cron', id='reset_daily_searches',hour=0)
     def reset_daily_searches():
-        with app.app_context:
+        with app.app_context(): # ✅ CORRECT: app_context() is called as a method
             try:
                 search_queires = SearchQuery.query.all()
                 for sq in search_queires:
@@ -102,7 +102,6 @@ def create_app():
             except Exception as e:
                 db.session.rollback()
                 app.logger.error(f"Error resetting daily searches: {e}")
-                
 
     
     @app.route("/google-login", methods=["POST"])
