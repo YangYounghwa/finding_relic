@@ -47,7 +47,7 @@ class LLMServiceObjet:
 
         
         parser = PydanticOutputParser(pydantic_object=KorRelation)
-        template = """Read the text and check whether if the text is related to the Korean History, if so mark related as True, if not mark it false. If you are not sure on the result mark unsure as True, otherwise false.
+        template = """Read the text and check whether if the text is related to the Korean History or korean artefacts. It can be related to modern history., if so mark related as True, if not mark it false. If you are not sure on the result mark unsure as True, otherwise false.
         
         {format_instructions}
         
