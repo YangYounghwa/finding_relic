@@ -263,6 +263,7 @@ def create_app():
     
     
     @app.route("/detailInfo",methods=['GET'])
+    @jwt_required()
     def detailInfo():
         id = request.args.get("id")
         app.logger.debug(f"/detailInfo called with id : {id}")  
