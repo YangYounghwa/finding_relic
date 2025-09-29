@@ -4,7 +4,7 @@ from typing import Any, Dict, List
 from dotenv import load_dotenv
 from flask import current_app
 
-from relic_app.dto.EmuseumDTO import BriefInfo, BriefList, DetailInfo, ImageItem, ItemDetail, RelatedItem
+from relic_app.dto.EmuseumDTO import BriefInfo, BriefList, DataForVector, DetailInfo, ImageItem, ItemDetail, RelatedItem
 load_dotenv()
 import os
 
@@ -308,7 +308,9 @@ class EmuseumAPIService:
             brief_info_list.append(brief_info)
             
         return BriefList(totalCount=len(brief_info_list), brief_info_list=brief_info_list)
-            
+    
+    
+    # TODO : Add error handlling when receiving empty data from emuseum 
     def getDetailInfo(self,id:str)->DetailInfo:
         """_summary_
 
@@ -330,7 +332,7 @@ class EmuseumAPIService:
         logger.info(json_data.keys)
         detail_info_dto=None
         try:
-            detail_info_dto = create_detail_info_dto_with_mapping(
+            detail_info_dto:DetailInfo = create_detail_info_dto_with_mapping(
                 json_data,
                 item_mapping,
                 image_mapping,
@@ -340,6 +342,16 @@ class EmuseumAPIService:
             )
             logger.info(f"Successfully created DetailInfo DTO with dynamic key mapping:")
             # logger.info(detail_info_dto.model_dump_json(indent=2))
+            # parse detail_info_dto.item into DataForVector
+            
+            singleItem:ItemDetail = detail_info_dto.item
+            if(singleItem.glsv == 1):
+                dataForVector:DataForVector = DataForVector(relicId=singleItem.id,
+                    desc=singleItem.desc,
+                    purposeName=singleItem.purposeName,
+                    materialName=singleItem.materialName,
+                    nationalityName=singleItem.nationalityName1)
+                
             return detail_info_dto
             
         except Exception as e:
