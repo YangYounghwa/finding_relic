@@ -266,6 +266,13 @@ def create_app():
     @app.route("/detailInfo",methods=['GET'])
     @jwt_required()
     def detailInfo():
+            # Debug logging
+        app.logger.debug("Request method: %s", request.method)
+        app.logger.debug("Full URL: %s", request.url)
+        app.logger.debug("Query string args: %s", request.args.to_dict())
+        app.logger.debug("Headers: %s", dict(request.headers))
+        app.logger.debug("JSON body: %s", request.get_json(silent=True))
+        app.logger.debug("Raw body: %s", request.get_data(as_text=True))
         detail_id = request.args.get("id")
         app.logger.debug(f"/detailInfo called with id : {detail_id}") 
         if not detail_id:
