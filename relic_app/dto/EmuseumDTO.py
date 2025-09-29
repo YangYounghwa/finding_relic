@@ -5,7 +5,7 @@
 
 
 from typing import List
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Generic, TypeVar
 
 
@@ -48,7 +48,8 @@ class ItemDetail(BaseModel):
     imgThumUriS:str | None
     imgThumUriM:str | None
     imgThumUriL:str | None
-    
+
+    glsv : int | None = Field(description="Korea Gov open data license version.") # -- added 20250929    
 
 class DetailInfo(BaseModel):
     item:ItemDetail
@@ -101,6 +102,22 @@ class APIResponse(BaseModel,Generic[T]):
     userId:int | None
     # searchQueryLeft:int | None  # Placeholder for now
     data:T  # T can be either BriefList or DetailInfoList
+    
+class DataForVector(BaseModel):
+    """_summary_
+    Save the data only if 'glsv' == 1  
+    This is legal restriction of 공공누리.
+
+    Args:
+        BaseModel (_type_): _description_
+    """
+    relicId : str
+    desc : str = Field(description="Will be vectorized and saved to vector DB")
+    materialName : str = Field(description="Use materialName depth of 3.")
+    purposeName : str = Field(description="Use purposeName depth of 3.")
+    nationalityName : str = Field(description="Nation Name")
+    
+    
     
     
     

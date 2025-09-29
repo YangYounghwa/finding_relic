@@ -14,8 +14,10 @@ from google.oauth2 import id_token
 
 from flask_jwt_extended import create_access_token, JWTManager, jwt_required, get_jwt_identity
 
+from relic_app.services.retrieverService.RetrieverService import RelicRetriever
 from relic_app.services.searchService.SearchService import searcher
 from relic_app.services.emuseumService.EmuseumService import emuseum
+from relic_app.services.embeddingService.EmbeddingService import embedding_service
 from relic_app.dto.EmuseumDTO import DetailInfoList
 
 
@@ -339,6 +341,21 @@ def create_app():
                 db.session.rollback()
                 app.logger.error(f"Error adding user: {e}")
                 return jsonify({"msg": "An error occurred while adding the user"}), 500
+            
+    @app.route("/embed-data", methods=['POST'])
+    def embed_data():
+        secret_key = request.json.get("secret_key")
+        if secret_key != os.getenv("EMBEDDING_SECRET_KEY"):
+            return jsonify({"msg": "Unauthorized"}), 401
+
+        try:
+            embedding_service.embed_and_save()
+            return jsonify({"msg": "Embedding process started."}), 200
+        except Exception as e:
+            app.logger.error(f"An error occurred during embedding: {e}")
+            return jsonify({"msg": "An error occurred during the embedding process."}), 500
+
+
          
     with app.app_context():
         db.create_all()
