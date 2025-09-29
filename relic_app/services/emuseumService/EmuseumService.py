@@ -104,6 +104,7 @@ def create_detail_info_dto_with_mapping(
         # Dynamically set purposeName and materialName based on priority
         purpose_name = find_first_existing_key(parsed_item, purpose_priority)
         material_name = find_first_existing_key(parsed_item, material_priority)
+        glsv = parsed_item.get('glsv')
         
         # Build a dictionary for the ItemDetail model using the mapping
         item_data_for_model = {dto_field: parsed_item.get(api_key) 
@@ -112,6 +113,7 @@ def create_detail_info_dto_with_mapping(
         # Add the special purpose and material fields
         item_data_for_model['purposeName'] = purpose_name
         item_data_for_model['materialName'] = material_name
+        item_data_for_model['glsv'] = glsv
         
         item_detail_instance = ItemDetail(**item_data_for_model)
 
