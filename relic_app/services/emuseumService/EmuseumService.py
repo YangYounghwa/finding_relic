@@ -30,7 +30,7 @@ def parse_list_or_dict_of_items(data):
     parsed_list = []
     
     # 1. data 자체가 item 리스트를 가진 딕셔너리일 경우 (가장 흔한 케이스)
-    if isinstance(data, dict) and 'item' in data:
+    if isinstance(da    ta, dict) and 'item' in data:
         items = data['item']
         # 2. item이 단일 객체(dict)인 경우, 리스트로 감싸서 통일된 처리를 보장
         if isinstance(items, dict):
@@ -99,19 +99,35 @@ def create_detail_info_dto_with_mapping(
     """
 
     # ✨ CORE FIX: Adjusted the data extraction path to match the actual API response
-    try:
-        # The main item data is directly under result['list']['data']
-        items_data = raw_json_data.get('result', {}).get('list', {}).get('data', {})
-        # The image list is under result['imageList']['list']['data']
-        image_items_data = raw_json_data.get('result', {}).get('imageList', {}).get('list', {}).get('data', [])
-        # The related items list remains the same
-        related_items_data = raw_json_data.get('result', {}).get('relationList', {}).get('list', {}).get('data', {})
-        logger.debug("Successfully extracted main data sections from raw JSON.")
-    except AttributeError as e:
-        logger.error(f"Failed to extract main data sections due to unexpected structure: {e}")
+    # ✨ CORE FIX: Added highly defensive, step-by-step data extraction
+    # This prevents 'NoneType' errors by checking each key's existence.
+    items_data = {}
+    image_items_data = []
+    related_items_data = {}
+
+    result = raw_json_data.get('result')
+    if result:
+        # Safely get the main item data
+        item_list = result.get('list')
+        if item_list:
+            items_data = item_list.get('data', {})
+        
+        # Safely get the image list data
+        image_list_section = result.get('imageList', {}).get('list')
+        if image_list_section:
+            image_items_data = image_list_section.get('data', [])
+
+        # Safely get the related items data
+        relation_list_section = result.get('relationList', {}).get('list')
+        if relation_list_section:
+            related_items_data = relation_list_section.get('data', {})
+        
+        logger.debug("Safely extracted data sections from raw JSON.")
+    else:
+        logger.error("The 'result' key was missing from the API response.")
         logger.error(f"Raw JSON data that caused the error:\n{pformat(raw_json_data)}")
-        # Return a default object to prevent further errors
         return DetailInfo(item=ItemDetail(id=""), imageList=None, related=None)
+
 
     # The rest of the function remains the same as it correctly processes the data once extracted.
     parsed_items_list = parse_list_or_dict_of_items(items_data)
@@ -142,7 +158,8 @@ def create_detail_info_dto_with_mapping(
         item_data_for_model['materialName'] = material_name
         item_data_for_model['glsv'] = glsv
         
-        if 'id' not in item_data_for_model or not item_data_for_model['id']:
+        # Use .get() for the ID to avoid a KeyError if 'id' is somehow missing after all
+        if not item_data_for_model.get('id'):
              logger.error("'id' is missing from parsed item data. Cannot create ItemDetail.")
              return DetailInfo(item=ItemDetail(id=""), imageList=None, related=None)
 
