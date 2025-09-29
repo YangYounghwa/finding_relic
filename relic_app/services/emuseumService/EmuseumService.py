@@ -5,6 +5,8 @@ from dotenv import load_dotenv
 from flask import current_app
 
 from relic_app.dto.EmuseumDTO import BriefInfo, BriefList, DataForVector, DetailInfo, ImageItem, ItemDetail, RelatedItem
+from relic_app.services.embeddingService.EmbeddingService import embedding_service
+
 load_dotenv()
 import os
 
@@ -351,6 +353,7 @@ class EmuseumAPIService:
                     purposeName=singleItem.purposeName,
                     materialName=singleItem.materialName,
                     nationalityName=singleItem.nationalityName1)
+                embedding_service.save_data_for_vector(dataForVector)
                 
             return detail_info_dto
             

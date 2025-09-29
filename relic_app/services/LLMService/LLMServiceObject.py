@@ -123,6 +123,7 @@ Your response must be a single item from the list. Follow the specified format i
                 logger.debug(f"Arguments {e.args[0]}")
                 relation = {"error": True}
         # Access the token counts after the LLM call
+        # try catch, 혹은 db에 넣을 때 따로 thread를 생성, 응답 시간을 고려해야 함.
         logger.info(f"Total Tokens: {cb.total_tokens}")
         logger.info(f"Prompt Tokens: {cb.prompt_tokens}")
         logger.info(f"Completion Tokens: {cb.completion_tokens}")

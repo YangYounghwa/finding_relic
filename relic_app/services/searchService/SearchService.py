@@ -53,9 +53,9 @@ class SearchServiceObject:
         search_args_list = []
         
         # --- Add name-based searches FIRST to prioritize them ---
-        if relicName.name:
+        if relicName.name and (relicName != "Unknown" or relicName != "unknown"):
             search_args_list.append({'name': relicName.name})
-        if relicName.candidate and relicName.candidate_certainty:
+        if relicName.candidate and relicName.candidate_certainty and (relicName.candidate != "Unknown" or relicName.candidate != "unknown"):
             search_args_list.append({'name': relicName.candidate})
 
         # --- Use itertools.product for a clean way to get all keyword combinations ---
