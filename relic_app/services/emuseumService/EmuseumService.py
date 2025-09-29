@@ -30,7 +30,7 @@ def parse_list_or_dict_of_items(data):
     parsed_list = []
     
     # 1. data 자체가 item 리스트를 가진 딕셔너리일 경우 (가장 흔한 케이스)
-    if isinstance(da    ta, dict) and 'item' in data:
+    if isinstance(data, dict) and 'item' in data:
         items = data['item']
         # 2. item이 단일 객체(dict)인 경우, 리스트로 감싸서 통일된 처리를 보장
         if isinstance(items, dict):
