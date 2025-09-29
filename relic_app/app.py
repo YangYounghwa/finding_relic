@@ -274,6 +274,8 @@ def create_app():
         app.logger.debug("JSON body: %s", request.get_json(silent=True))
         app.logger.debug("Raw body: %s", request.get_data(as_text=True))
         detail_id = request.args.get("id")
+        if detail_id == None:
+            detail_id = request.args.get("Id")
         app.logger.debug(f"/detailInfo called with id : {detail_id}") 
         if not detail_id:
             return jsonify({"msg": "id is missing"}), 400

@@ -337,7 +337,7 @@ class EmuseumAPIService:
                 material_priority
             )
             logger.info(f"Successfully created DetailInfo DTO with dynamic key mapping:")
-            logger.info(detail_info_dto.model_dump_json(indent=2))
+            # logger.info(detail_info_dto.model_dump_json(indent=2))
             return detail_info_dto
             
         except Exception as e:
