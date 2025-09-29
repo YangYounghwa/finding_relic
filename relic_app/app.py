@@ -5,6 +5,7 @@ from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 
 from dotenv import load_dotenv
+from marshmallow import ValidationError
 
 from relic_app.dto.EmuseumDTO import APIResponse, BriefList, DetailInfo
 
@@ -263,10 +264,33 @@ def create_app():
     
     
     @app.route("/detailInfo",methods=['GET'])
+    @jwt_required()
     def detailInfo():
-        id = request.args.get("id")  
-    
-        detail:DetailInfo = emuseum.getDetailInfo(id)
+            # Debug logging
+        app.logger.debug("Request method: %s", request.method)
+        app.logger.debug("Full URL: %s", request.url)
+        app.logger.debug("Query string args: %s", request.args.to_dict())
+        app.logger.debug("Headers: %s", dict(request.headers))
+        app.logger.debug("JSON body: %s", request.get_json(silent=True))
+        app.logger.debug("Raw body: %s", request.get_data(as_text=True))
+        detail_id = request.args.get("id")
+        if detail_id == None:
+            detail_id = request.args.get("Id")
+        app.logger.debug(f"/detailInfo called with id : {detail_id}") 
+        if not detail_id:
+            return jsonify({"msg": "id is missing"}), 400
+        
+        try:
+            detail = emuseum.getDetailInfo(detail_id)
+            result = DetailInfoList(detail_info_list=[detail]) if detail else DetailInfoList(detail_info_list=[])
+        except ValidationError as ve:
+            app.logger.warning(f"Validation error while creating DetailInfo: {ve}")
+            return jsonify(APIResponse(
+                message="Invalid data from upstream",
+                success=False,
+                userId=0,
+                data=DetailInfoList(detail_info_list=[])
+            ).model_dump()), 200
         result = DetailInfoList(detail_info_list=[detail])
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
         return jsonify(responseObj.model_dump())
@@ -275,7 +299,7 @@ def create_app():
     
     @app.route("/test/detailInfo",methods=['GET'])
     def test_detailInfo():
-        
+        app.logger.debug("test_detailInfo called.")
         if app.config['TEST_MODE'] != True:
             abort(404)
         id = request.args.get("id")  

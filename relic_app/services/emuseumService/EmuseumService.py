@@ -316,13 +316,16 @@ class EmuseumAPIService:
         Returns:
             dict: detailed json from the api.
         """
-        
+        logger.info(f"getDetailInfo called with id: {id}") 
         params={}
         if id:
             params['id'] = id
-        apiRoute = "/relic/detail" 
+        apiRoute = "/relic/detail"
+        logger.info(params)
         
         json_data = self._makeRequests_detail(apiRoute, params,pageNo=1,numOfRows=10)
+        logger.info("getDetailInfo received json data.")
+        logger.info(json_data.keys)
         detail_info_dto=None
         try:
             detail_info_dto = create_detail_info_dto_with_mapping(
@@ -334,7 +337,7 @@ class EmuseumAPIService:
                 material_priority
             )
             logger.info(f"Successfully created DetailInfo DTO with dynamic key mapping:")
-            logger.info(detail_info_dto.model_dump_json(indent=2))
+            # logger.info(detail_info_dto.model_dump_json(indent=2))
             return detail_info_dto
             
         except Exception as e:
