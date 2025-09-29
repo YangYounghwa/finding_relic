@@ -5,6 +5,7 @@ from flask import Flask, abort, jsonify, request
 from flask_cors import CORS
 
 from dotenv import load_dotenv
+from marshmallow import ValidationError
 
 from relic_app.dto.EmuseumDTO import APIResponse, BriefList, DetailInfo
 
@@ -265,9 +266,22 @@ def create_app():
     @app.route("/detailInfo",methods=['GET'])
     @jwt_required()
     def detailInfo():
-        id = request.args.get("id")
-        app.logger.debug(f"/detailInfo called with id : {id}")  
-        detail:DetailInfo = emuseum.getDetailInfo(id)
+        detail_id = request.args.get("id")
+        app.logger.debug(f"/detailInfo called with id : {detail_id}") 
+        if not detail_id:
+            return jsonify({"msg": "id is missing"}), 400
+        
+        try:
+            detail = emuseum.getDetailInfo(detail_id)
+            result = DetailInfoList(detail_info_list=[detail]) if detail else DetailInfoList(detail_info_list=[])
+        except ValidationError as ve:
+            app.logger.warning(f"Validation error while creating DetailInfo: {ve}")
+            return jsonify(APIResponse(
+                message="Invalid data from upstream",
+                success=False,
+                userId=0,
+                data=DetailInfoList(detail_info_list=[])
+            ).model_dump()), 200
         result = DetailInfoList(detail_info_list=[detail])
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
         return jsonify(responseObj.model_dump())
