@@ -264,8 +264,8 @@ def create_app():
     
     @app.route("/detailInfo",methods=['GET'])
     def detailInfo():
-        id = request.args.get("id")  
-    
+        id = request.args.get("id")
+        app.logger.debug(f"/detailInfo called with id : {id}")  
         detail:DetailInfo = emuseum.getDetailInfo(id)
         result = DetailInfoList(detail_info_list=[detail])
         responseObj = APIResponse(message="Success",success=True,userId=0,data=result)
@@ -275,7 +275,7 @@ def create_app():
     
     @app.route("/test/detailInfo",methods=['GET'])
     def test_detailInfo():
-        
+        app.logger.debug("test_detailInfo called.")
         if app.config['TEST_MODE'] != True:
             abort(404)
         id = request.args.get("id")  
