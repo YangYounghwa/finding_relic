@@ -97,17 +97,23 @@ def create_detail_info_dto_with_mapping(
     Returns:
         A DetailInfo Pydantic model instance.
     """
-    # Safely extract raw data sections
+
+    # ✨ CORE FIX: Adjusted the data extraction path to match the actual API response
     try:
+        # The main item data is directly under result['list']['data']
         items_data = raw_json_data.get('result', {}).get('list', {}).get('data', {})
+        # The image list is under result['imageList']['list']['data']
         image_items_data = raw_json_data.get('result', {}).get('imageList', {}).get('list', {}).get('data', [])
+        # The related items list remains the same
         related_items_data = raw_json_data.get('result', {}).get('relationList', {}).get('list', {}).get('data', {})
+        logger.debug("Successfully extracted main data sections from raw JSON.")
     except AttributeError as e:
         logger.error(f"Failed to extract main data sections due to unexpected structure: {e}")
         logger.error(f"Raw JSON data that caused the error:\n{pformat(raw_json_data)}")
+        # Return a default object to prevent further errors
         return DetailInfo(item=ItemDetail(id=""), imageList=None, related=None)
 
-    # Parse raw data into usable dictionaries
+    # The rest of the function remains the same as it correctly processes the data once extracted.
     parsed_items_list = parse_list_or_dict_of_items(items_data)
     parsed_image_items_list = parse_list_or_dict_of_items(image_items_data)
     parsed_related_items_list = parse_list_or_dict_of_items(related_items_data)
@@ -116,43 +122,33 @@ def create_detail_info_dto_with_mapping(
     image_list_instances = None
     related_item_instance = None
 
-    # 1. Create the ItemDetail object using the provided mapping
     if parsed_items_list:
         parsed_item = parsed_items_list[0]
         
-        # Use a function to find the first existing key from a priority list
         def find_first_existing_key(data_dict: dict, keys: List[str]) -> Any:
             for key in keys:
                 if key in data_dict:
                     return data_dict.get(key)
             return None
 
-        # Dynamically set purposeName and materialName based on priority
         purpose_name = find_first_existing_key(parsed_item, purpose_priority)
         material_name = find_first_existing_key(parsed_item, material_priority)
         glsv = parsed_item.get('glsv')
         
-        # Build a dictionary for the ItemDetail model using the mapping
         item_data_for_model = {dto_field: parsed_item.get(api_key) 
                                for dto_field, api_key in item_mapping.items()}
         
-        # Add the special purpose and material fields
         item_data_for_model['purposeName'] = purpose_name
         item_data_for_model['materialName'] = material_name
         item_data_for_model['glsv'] = glsv
         
-        
-        # **Robustness Improvement**: Ensure required fields are present before creating the model
         if 'id' not in item_data_for_model or not item_data_for_model['id']:
              logger.error("'id' is missing from parsed item data. Cannot create ItemDetail.")
              return DetailInfo(item=ItemDetail(id=""), imageList=None, related=None)
 
         item_detail_instance = ItemDetail(**item_data_for_model)
         logger.debug(f"Successfully created ItemDetail instance for id: {item_detail_instance.id}")
-        
 
-
-    # 2. Create the list of ImageItem objects using the provided mapping
     if parsed_image_items_list:
         image_list_instances = []
         for image_data in parsed_image_items_list:
@@ -161,15 +157,13 @@ def create_detail_info_dto_with_mapping(
             image_list_instances.append(ImageItem(**image_item_data_for_model))
         logger.debug(f"Created {len(image_list_instances)} ImageItem instances.")
 
-
-    # 3. Create the RelatedItem object using the provided mapping
     if parsed_related_items_list:
         related_data = parsed_related_items_list[0]
         related_item_data_for_model = {dto_field: related_data.get(api_key)
                                        for dto_field, api_key in related_mapping.items()}
         related_item_instance = RelatedItem(**related_item_data_for_model)
+        logger.debug("Successfully created RelatedItem instance.")
 
-    # 4. Construct the final DTO
     if item_detail_instance:
         return DetailInfo(
             item=item_detail_instance,
@@ -177,7 +171,6 @@ def create_detail_info_dto_with_mapping(
             related=related_item_instance
         )
     else:
-        # Fallback for when no main item data is found
         logger.warning("No main item data was found in the API response. Returning an empty DetailInfo.")
         return DetailInfo(item=ItemDetail(id=""), imageList=None, related=None)
     
