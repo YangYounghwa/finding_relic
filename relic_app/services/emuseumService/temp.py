@@ -3,8 +3,8 @@
 from typing import Any, Dict, List
 from dotenv import load_dotenv
 from flask import current_app
-import json # Import json for pretty printing
-from pprint import pformat # Import pformat for pretty printing
+import json
+from pprint import pformat
 
 from relic_app.dto.EmuseumDTO import BriefInfo, BriefList, DataForVector, DetailInfo, ImageItem, ItemDetail, RelatedItem
 from relic_app.services.embeddingService.EmbeddingService import embedding_service
@@ -20,26 +20,44 @@ import requests
 import logging
 logger = logging.getLogger(__name__)
 
-
-# (Helper function parse_list_or_dict_of_items remains the same)
+# ✨ 핵심 수정 사항: 더 유연한 파싱을 위한 헬퍼 함수
 def parse_list_or_dict_of_items(data):
-    """Parses a data structure that can be either a list of dictionaries or a single dictionary."""
+    """
+    e-Museum API의 비일관적인 응답 구조를 처리하기 위해 개선된 파서입니다.
+    'item' 키의 값이 리스트일 수도 있고, 단일 딕셔너리일 수도 있는 경우를 모두 처리합니다.
+    """
     parsed_list = []
     
-    if isinstance(data, list):
+    # 1. data 자체가 item 리스트를 가진 딕셔너리일 경우 (가장 흔한 케이스)
+    if isinstance(data, dict) and 'item' in data:
+        items = data['item']
+        # 2. item이 단일 객체(dict)인 경우, 리스트로 감싸서 통일된 처리를 보장
+        if isinstance(items, dict):
+            items = [items]
+        
+        # 3. item 리스트를 순회하며 파싱
+        if isinstance(items, list):
+            # item 내부가 '@key', '@value' 쌍으로 이루어진 경우
+            if all(isinstance(i, dict) and '@key' in i for i in items):
+                 parsed_item = {item['@key']: item['@value'] for item in items}
+                 parsed_list.append(parsed_item)
+            else: # item 내부가 이미 완성된 딕셔너리들의 리스트인 경우
+                for item_dict in items:
+                    if 'item' in item_dict and isinstance(item_dict['item'], list):
+                         parsed_item = {item['@key']: item['@value'] for item in item_dict['item']}
+                         parsed_list.append(parsed_item)
+
+    # 4. data 자체가 딕셔너리 리스트일 경우 (예: 'data': [{'item':...}, {'item':...}])
+    elif isinstance(data, list):
         for item_dict in data:
-            if isinstance(item_dict.get('item'), list):
+            if 'item' in item_dict and isinstance(item_dict['item'], list):
                 parsed_item = {item['@key']: item['@value'] for item in item_dict['item']}
                 parsed_list.append(parsed_item)
-    
-    elif isinstance(data, dict):
-        if isinstance(data.get('item'), list):
-            parsed_item = {item['@key']: item['@value'] for item in data['item']}
-            parsed_list.append(parsed_item)
-            
+
     return parsed_list
 
-# (Mappings remain the same)
+
+# (기존 매핑 변수들은 변경 없음)
 item_mapping = {
     'nameKr': 'nameKr', 'id': 'id', 'museumName1': 'museumName1',
     'museumName2': 'museumName2', 'desc': 'desc',
@@ -68,9 +86,8 @@ def create_detail_info_dto_with_mapping(
     material_priority: List[str]
 ) -> DetailInfo:
     """
-    (Function description remains the same)
+    (함수 설명은 기존과 동일)
     """
-    # Safely extract raw data sections with added logging
     try:
         items_data = raw_json_data.get('result', {}).get('list', {}).get('data', {})
         image_items_data = raw_json_data.get('result', {}).get('imageList', {}).get('list', {}).get('data', [])
@@ -81,8 +98,6 @@ def create_detail_info_dto_with_mapping(
         logger.error(f"Raw JSON data that caused the error:\n{pformat(raw_json_data)}")
         return DetailInfo(item=ItemDetail(id=""), imageList=None, related=None)
 
-
-    # Parse raw data into usable dictionaries
     parsed_items_list = parse_list_or_dict_of_items(items_data)
     parsed_image_items_list = parse_list_or_dict_of_items(image_items_data)
     parsed_related_items_list = parse_list_or_dict_of_items(related_items_data)
@@ -91,7 +106,6 @@ def create_detail_info_dto_with_mapping(
     image_list_instances = None
     related_item_instance = None
 
-    # 1. Create the ItemDetail object using the provided mapping
     if parsed_items_list:
         parsed_item = parsed_items_list[0]
         
@@ -112,7 +126,6 @@ def create_detail_info_dto_with_mapping(
         item_data_for_model['materialName'] = material_name
         item_data_for_model['glsv'] = glsv
         
-        # **Robustness Improvement**: Ensure required fields are present before creating the model
         if 'id' not in item_data_for_model or not item_data_for_model['id']:
              logger.error("'id' is missing from parsed item data. Cannot create ItemDetail.")
              return DetailInfo(item=ItemDetail(id=""), imageList=None, related=None)
@@ -120,8 +133,6 @@ def create_detail_info_dto_with_mapping(
         item_detail_instance = ItemDetail(**item_data_for_model)
         logger.debug(f"Successfully created ItemDetail instance for id: {item_detail_instance.id}")
 
-
-    # 2. Create the list of ImageItem objects using the provided mapping
     if parsed_image_items_list:
         image_list_instances = []
         for image_data in parsed_image_items_list:
@@ -130,8 +141,6 @@ def create_detail_info_dto_with_mapping(
             image_list_instances.append(ImageItem(**image_item_data_for_model))
         logger.debug(f"Created {len(image_list_instances)} ImageItem instances.")
 
-
-    # 3. Create the RelatedItem object using the provided mapping
     if parsed_related_items_list:
         related_data = parsed_related_items_list[0]
         related_item_data_for_model = {dto_field: related_data.get(api_key)
@@ -139,8 +148,6 @@ def create_detail_info_dto_with_mapping(
         related_item_instance = RelatedItem(**related_item_data_for_model)
         logger.debug("Successfully created RelatedItem instance.")
 
-
-    # 4. Construct the final DTO
     if item_detail_instance:
         return DetailInfo(
             item=item_detail_instance,
@@ -148,7 +155,6 @@ def create_detail_info_dto_with_mapping(
             related=related_item_instance
         )
     else:
-        # Fallback for when no main item data is found
         logger.warning("No main item data was found in the API response. Returning an empty DetailInfo.")
         return DetailInfo(item=ItemDetail(id=""), imageList=None, related=None)
 
@@ -166,7 +172,6 @@ class EmuseumAPIService:
 
     
     def _makeRequests(self, apiRoute: str, params: Dict, pageNo: int = 1, numOfRows: int = 10) -> tuple[list, int] | None:
-        # (This method remains largely the same, but you could add similar logging if needed)
         params["serviceKey"] = self.apiKey
         params["pageNo"] = pageNo
         params["numOfRows"] = numOfRows
@@ -207,22 +212,16 @@ class EmuseumAPIService:
     
     
     def _makeRequests_detail(self, apiRoute: str, params: Dict, pageNo: int = 1, numOfRows: int = 1) -> dict:
-        """
-        Makes a request to the detail API, with improved error handling and logging.
-        """
         params["serviceKey"] = self.apiKey
         params["pageNo"] = pageNo
         params["numOfRows"] = numOfRows
         
         try:
             response = requests.get(self.emuseumURL + apiRoute, params, timeout=15)
-            # **Logging Improvement**: Log the raw response text before parsing
             logger.debug(f"Raw XML response for detail request:\n{response.text}")
             response.raise_for_status()
             xml_content = response.content
-            # **Robustness Improvement**: Wrap parsing in a try...except block
             json_data = xmltodict.parse(xml_content)
-            # **Logging Improvement**: Use pformat for pretty logging of the parsed JSON
             logger.debug(f"Successfully parsed XML to JSON:\n{pformat(json_data)}")
             return json_data
         except requests.exceptions.HTTPError as http_err:
@@ -235,7 +234,7 @@ class EmuseumAPIService:
         except Exception as e:
             logger.error(f"An unexpected error occurred in _makeRequests_detail: {e}")
             
-        return {} # Return an empty dict on failure
+        return {}
 
 
     def getItemsByKeywords(self,name:str=None,author:str=None,
@@ -244,7 +243,6 @@ class EmuseumAPIService:
                            purposeCode:str=None,sizeRangeCode:str=None,
                            placeLandCode:str=None,designationCode:str=None,
                            indexWord:str=None,pageNo:int=1,numOfRows:int=20)->BriefList:
-        # (This method remains the same)
         params={}
         if name:
             params['name'] = name
@@ -311,10 +309,6 @@ class EmuseumAPIService:
     
     
     def getDetailInfo(self,id:str)->DetailInfo:
-        """
-        Retrieves and parses detailed information for a specific relic ID.
-        Now with enhanced logging and error handling.
-        """
         logger.info(f"getDetailInfo called with id: {id}") 
         params={'id': id} if id else {}
         if not params:
@@ -325,7 +319,6 @@ class EmuseumAPIService:
         
         json_data = self._makeRequests_detail(apiRoute, params, pageNo=1, numOfRows=1)
         
-        # **Robustness Improvement**: Check if json_data is empty (which indicates a failure in the request)
         if not json_data:
             logger.error(f"Failed to get any data from _makeRequests_detail for id: {id}")
             return None
@@ -349,7 +342,6 @@ class EmuseumAPIService:
             logger.info(f"Successfully created DetailInfo DTO for relic id: {detail_info_dto.item.id}")
             
             singleItem:ItemDetail = detail_info_dto.item
-            # Check for glsv and save data for vector embedding if applicable
             if(singleItem.glsv == 1):
                 logger.debug(f"glsv is 1 for relic {singleItem.id}. Saving data for vectorization.")
                 dataForVector:DataForVector = DataForVector(relicId=singleItem.id,
@@ -362,7 +354,6 @@ class EmuseumAPIService:
             return detail_info_dto
             
         except Exception as e:
-            # This is a final catch-all for any other unexpected errors during DTO creation.
             logger.critical(f"A critical, unexpected error occurred during DTO creation for id {id}: {e}", exc_info=True)
             return None
 

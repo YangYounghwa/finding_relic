@@ -23,20 +23,38 @@ logger = logging.getLogger(__name__)
 
 # Helper function.
 def parse_list_or_dict_of_items(data):
-    """Parses a data structure that can be either a list of dictionaries or a single dictionary."""
+    """
+    e-Museum API의 비일관적인 응답 구조를 처리하기 위해 개선된 파서입니다.
+    'item' 키의 값이 리스트일 수도 있고, 단일 딕셔너리일 수도 있는 경우를 모두 처리합니다.
+    """
     parsed_list = []
     
-    if isinstance(data, list):
+    # 1. data 자체가 item 리스트를 가진 딕셔너리일 경우 (가장 흔한 케이스)
+    if isinstance(data, dict) and 'item' in data:
+        items = data['item']
+        # 2. item이 단일 객체(dict)인 경우, 리스트로 감싸서 통일된 처리를 보장
+        if isinstance(items, dict):
+            items = [items]
+        
+        # 3. item 리스트를 순회하며 파싱
+        if isinstance(items, list):
+            # item 내부가 '@key', '@value' 쌍으로 이루어진 경우
+            if all(isinstance(i, dict) and '@key' in i for i in items):
+                 parsed_item = {item['@key']: item['@value'] for item in items}
+                 parsed_list.append(parsed_item)
+            else: # item 내부가 이미 완성된 딕셔너리들의 리스트인 경우
+                for item_dict in items:
+                    if 'item' in item_dict and isinstance(item_dict['item'], list):
+                         parsed_item = {item['@key']: item['@value'] for item in item_dict['item']}
+                         parsed_list.append(parsed_item)
+
+    # 4. data 자체가 딕셔너리 리스트일 경우 (예: 'data': [{'item':...}, {'item':...}])
+    elif isinstance(data, list):
         for item_dict in data:
-            if isinstance(item_dict.get('item'), list):
+            if 'item' in item_dict and isinstance(item_dict['item'], list):
                 parsed_item = {item['@key']: item['@value'] for item in item_dict['item']}
                 parsed_list.append(parsed_item)
-    
-    elif isinstance(data, dict):
-        if isinstance(data.get('item'), list):
-            parsed_item = {item['@key']: item['@value'] for item in data['item']}
-            parsed_list.append(parsed_item)
-            
+
     return parsed_list
 
 item_mapping = {
