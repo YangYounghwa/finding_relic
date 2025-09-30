@@ -69,7 +69,7 @@ The application follows a service-oriented architecture:
     SUPABASE_URL='your_database_connection_string'
 
     # e-Museum API Key
-    EMUSESUM_URL=https://www.emuseum.go.kr/openapi/relic
+    EMUSESUM_URL=https://www.emuseum.go.kr/openapi
     EMUSEUM_KEY_DECODED='your_decoded_emuseum_api_key'
 
     # Secret key for embedding endpoint
