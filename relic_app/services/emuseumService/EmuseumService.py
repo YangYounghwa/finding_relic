@@ -392,14 +392,14 @@ class EmuseumAPIService:
             # logger.info(detail_info_dto.model_dump_json(indent=2))
             # parse detail_info_dto.item into DataForVector
             
-            singleItem:ItemDetail = detail_info_dto.item
-            if(singleItem.glsv == 1):
-                dataForVector:DataForVector = DataForVector(relicId=singleItem.id,
-                    desc=singleItem.desc,
-                    purposeName=singleItem.purposeName,
-                    materialName=singleItem.materialName,
-                    nationalityName=singleItem.nationalityName1)
-                embedding_service.save_data_for_vector(dataForVector)
+            # singleItem:ItemDetail = detail_info_dto.item
+            # if(singleItem.glsv == 1):
+            #     dataForVector:DataForVector = DataForVector(relicId=singleItem.id,
+            #         desc=singleItem.desc,
+            #         purposeName=singleItem.purposeName,
+            #         materialName=singleItem.materialName,
+            #         nationalityName=singleItem.nationalityName1)
+            #     embedding_service.save_data_for_vector(dataForVector)
                 
             return detail_info_dto
             
